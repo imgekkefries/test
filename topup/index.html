@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+(function(){
+  var KNOWN=['solves','login','register','topup','preferences','docs','extension','subscriptions'];
+  var parts=location.pathname.split('/').filter(Boolean);
+  if(parts.length && parts[parts.length-1]==='index.html')parts.pop();
+  if(parts.length && KNOWN.indexOf(parts[parts.length-1])!==-1)parts.pop();
+  var root='/'+(parts.length?parts.join('/')+'/':'');
+  window.__appRoot=root;
+  var b=document.createElement('base');b.href=root;
+  document.head.insertBefore(b,document.head.firstChild);
+})();
+</script>
+<title>Gekke.org ~ Solutions</title>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<style>
+@font-face{font-family:"Terminal";src:url("https://imgekkefries.pythonanywhere.com/terminal.woff") format("woff");font-weight:normal;font-style:normal;font-display:swap}
+:root{
+--surface-0:#0e0f13;--surface-1:#15161c;--surface-2:#1b1d24;--surface-3:#22242d;--surface-4:#2a2d38;
+--line-1:#262932;--line-2:#323641;
+--text-1:#f4f5f8;--text-2:#b9bcc8;--text-3:#7c8091;--text-4:#50535e;
+--accent:#8ea3ff;--accent-hi:#ffffff;--good:#6ee7a8;--warn:#f5c76e;--bad:#ff7d7d;
+--page-max:1400px;--page-pad-x:clamp(16px,2.4vw,48px);--page-pad-y:clamp(24px,3vw,56px);
+--scale:1;--font-mono:"Terminal","SF Mono",Menlo,Consolas,monospace;
+--text-secondary:var(--text-2);--text-muted:var(--text-3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161d;color:var(--text-1);font-family:"Terminal","SF Mono",Menlo,Consolas,monospace;font-size:clamp(12px,0.5vw + 10px,17px);line-height:1.5;letter-spacing:0.01em;-webkit-font-smoothing:antialiased;padding:var(--page-pad-y) var(--page-pad-x);min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px}
+::selection{background:var(--accent);color:var(--surface-0)}
+html{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}
+.container{max-width:var(--page-max);margin:0 auto;position:relative;z-index:1;width:100%}
+.brand{font-size:clamp(36px,6.5vw,130px);letter-spacing:0.02em;color:var(--text-1);margin-bottom:clamp(20px,3vw,56px);line-height:1;font-weight:normal;user-select:none;animation:brandIn 0.6s ease both}
+.brand .accent{color:var(--text-3)}
+@keyframes brandIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:clamp(12px,2vw,32px);margin-bottom:clamp(28px,4vw,64px);padding-bottom:clamp(14px,1.6vw,22px);border-bottom:1px solid var(--line-1);animation:fadeDown 0.5s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.topbar-left{flex:1;display:flex;align-items:center;gap:clamp(6px,0.8vw,12px)}
+.topbar-center{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px)}
+.topbar-right{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,0.8vw,12px)}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--text-3);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.12em;text-transform:uppercase;padding:clamp(8px,0.7vw,12px) clamp(14px,1.2vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:color 0.2s ease,background 0.2s ease,border-color 0.2s ease;text-decoration:none;display:inline-flex;align-items:center;gap:0.5em;position:relative}
+.nav-btn i{font-size:1.3em;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.nav-btn:hover{color:var(--text-1);background:var(--surface-2)}
+.nav-btn.is-active{color:var(--text-1);background:var(--surface-3);border-color:var(--line-2)}
+.nav-btn.auth{background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-2)}
+.nav-btn.auth:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-1)}
+.nav-btn.auth.primary{background:var(--accent);border-color:var(--accent);color:var(--surface-0);font-weight:600}
+.nav-btn.auth.primary:hover{background:var(--accent-hi);border-color:var(--accent-hi)}
+.nav-btn.auth.logout{background:rgba(255,125,125,0.08);border-color:rgba(255,125,125,0.25);color:var(--bad)}
+.nav-btn.auth.logout:hover{background:rgba(255,125,125,0.14);border-color:rgba(255,125,125,0.4);color:var(--bad)}
+.balance-chip{display:none;align-items:center;gap:0.55em;background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-1);padding:clamp(7px,0.65vw,11px) clamp(12px,1.1vw,20px);border-radius:clamp(6px,0.5vw,10px);font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.05em;font-variant-numeric:tabular-nums}
+.balance-chip.is-visible{display:inline-flex;animation:chipIn 0.35s ease both}
+@keyframes chipIn{from{opacity:0;transform:translateY(-4px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.balance-chip .label{color:var(--text-3);text-transform:uppercase;letter-spacing:0.15em;font-size:0.85em}
+.balance-chip .value{color:var(--accent-hi);transition:color 0.3s ease}
+.balance-chip .value.flash{color:var(--good)}
+.topbar-right .auth-guest{display:inline-flex}
+.topbar-right .auth-user{display:none}
+.topbar.is-logged-in .topbar-right .auth-guest{display:none}
+.topbar.is-logged-in .topbar-right .auth-user{display:inline-flex}
+
+.topup-section{margin-bottom:clamp(28px,4vw,56px);animation:fadeUp 0.5s ease both}
+.topup-title{font-size:clamp(18px,1.2vw + 10px,28px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.3em}
+.topup-subtitle{font-size:clamp(11px,0.35vw + 8px,14px);color:var(--text-3);margin-bottom:clamp(18px,2vw,28px);line-height:1.5}
+.topup-row{display:flex;gap:clamp(8px,0.8vw,12px);align-items:stretch;max-width:640px;flex-wrap:wrap}
+.topup-input-wrap{flex:1 1 260px;position:relative;display:flex;align-items:center}
+.topup-currency{position:absolute;left:clamp(14px,1.2vw,20px);color:var(--text-3);font-size:clamp(13px,0.5vw + 9px,17px);pointer-events:none;letter-spacing:0.02em}
+.topup-input{width:100%;background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-1);font-family:inherit;font-size:clamp(13px,0.5vw + 9px,17px);padding:clamp(13px,1.1vw,18px) clamp(14px,1.2vw,20px);padding-left:clamp(36px,2.4vw,48px);border-radius:clamp(8px,0.6vw,12px);outline:none;transition:border-color 0.2s ease,background 0.2s ease;font-variant-numeric:tabular-nums;letter-spacing:0.02em}
+.topup-input:focus{border-color:var(--accent);background:var(--surface-3)}
+.topup-input::placeholder{color:var(--text-4)}
+.topup-submit{flex:0 0 auto;background:var(--accent);border:1px solid var(--accent);color:var(--surface-0);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);font-weight:600;letter-spacing:0.16em;text-transform:uppercase;padding:clamp(13px,1.1vw,18px) clamp(20px,1.8vw,30px);border-radius:clamp(8px,0.6vw,12px);cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease,opacity 0.2s ease;display:inline-flex;align-items:center;justify-content:center;gap:0.6em}
+.topup-submit:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi)}
+.topup-submit:disabled{opacity:0.55;cursor:not-allowed}
+.topup-help{font-size:clamp(10px,0.3vw + 8px,12px);color:var(--text-3);margin-top:clamp(10px,1vw,14px);letter-spacing:0.05em}
+
+.confirm-backdrop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:var(--page-pad-y) var(--page-pad-x);background:rgba(8,9,12,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity 0.28s ease}
+.confirm-backdrop.is-open{opacity:1;pointer-events:auto}
+.confirm-modal{width:100%;max-width:480px;background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(12px,1.2vw,22px);padding:clamp(28px,3vw,44px) clamp(26px,2.8vw,40px);box-shadow:0 1px 0 rgba(255,255,255,0.03) inset,0 40px 100px -40px rgba(0,0,0,0.95);transform:scale(0.94) translateY(12px);opacity:0;transition:transform 0.42s cubic-bezier(0.22,1,0.36,1),opacity 0.28s ease}
+.confirm-backdrop.is-open .confirm-modal{transform:scale(1) translateY(0);opacity:1}
+.confirm-title{font-size:clamp(18px,1.2vw + 10px,26px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.4em}
+.confirm-body{font-size:clamp(12px,0.4vw + 9px,15px);color:var(--text-2);line-height:1.6;margin-bottom:clamp(20px,2vw,28px)}
+.confirm-body .amount{color:var(--accent-hi);font-variant-numeric:tabular-nums;font-weight:600}
+.confirm-actions{display:flex;gap:clamp(8px,0.8vw,12px);flex-wrap:wrap}
+.confirm-btn{flex:1 1 auto;min-width:130px;font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.14em;text-transform:uppercase;padding:clamp(12px,1vw,16px) clamp(16px,1.4vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:0.6em;transition:background 0.2s ease,border-color 0.2s ease,color 0.2s ease,opacity 0.2s ease;border:1px solid var(--line-2);background:var(--surface-3);color:var(--text-1)}
+.confirm-btn:hover:not(:disabled){background:var(--surface-4);border-color:var(--accent);color:var(--accent-hi)}
+.confirm-btn:disabled{opacity:0.45;cursor:not-allowed}
+.confirm-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface-0);font-weight:600}
+.confirm-btn.primary:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi);color:var(--surface-0)}
+.confirm-btn.primary:disabled{background:var(--surface-3);border-color:var(--line-2);color:var(--text-3)}
+.confirm-btn .cooldown-num{font-variant-numeric:tabular-nums;display:inline-block;min-width:1.1em;text-align:center}
+
+.section{margin-bottom:clamp(32px,4vw,64px);animation:fadeUp 0.5s ease both}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;gap:clamp(12px,2vw,24px);margin-bottom:clamp(14px,1.6vw,22px)}
+.section-title{font-size:clamp(16px,1vw + 9px,24px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em}
+.section-count{font-size:clamp(10px,0.35vw + 8px,13px);color:var(--text-3);text-transform:uppercase;letter-spacing:0.22em;font-variant-numeric:tabular-nums}
+.section-empty{padding:clamp(28px,4vw,56px) clamp(16px,1.6vw,28px);text-align:center;color:var(--text-3);letter-spacing:0.15em;font-size:clamp(10px,0.35vw + 8px,13px);text-transform:uppercase;background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(8px,0.7vw,14px);animation:fadeUp 0.3s ease both}
+
+.invoice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,22vw,340px),1fr));gap:clamp(10px,1.2vw,18px)}
+.invoice-card{background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(8px,0.7vw,14px);padding:clamp(18px,1.6vw,24px);display:flex;flex-direction:column;gap:clamp(12px,1.2vw,16px);transition:border-color 0.2s ease,background 0.2s ease,opacity 0.35s ease,transform 0.35s ease}
+.invoice-card:hover{border-color:var(--line-2);background:var(--surface-3)}
+.invoice-card.card-enter{opacity:0;transform:translateY(8px);animation:cardEnter 0.4s cubic-bezier(0.22,1,0.36,1) forwards}
+@keyframes cardEnter{to{opacity:1;transform:translateY(0)}}
+.invoice-card.card-leave{opacity:0;transform:translateY(-6px);pointer-events:none}
+.invoice-card-top{display:flex;align-items:center;justify-content:space-between;gap:0.8em}
+.invoice-id{font-size:clamp(12px,0.4vw + 9px,15px);color:var(--accent);letter-spacing:0.04em;word-break:break-all;font-variant-numeric:tabular-nums}
+.invoice-status{display:inline-flex;align-items:center;gap:0.4em;background:rgba(245,199,110,0.12);color:var(--warn);border:1px solid rgba(245,199,110,0.25);border-radius:clamp(3px,0.25vw,5px);padding:0.3em 0.85em;font-size:clamp(10px,0.3vw + 8px,12px);letter-spacing:0.14em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.invoice-status.status-processing{background:rgba(142,163,255,0.12);color:var(--accent);border-color:rgba(142,163,255,0.25)}
+.invoice-amounts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1vw,14px);padding:clamp(12px,1.1vw,16px) 0;border-top:1px solid var(--line-1);border-bottom:1px solid var(--line-1)}
+.invoice-amount-item .label{font-size:clamp(9px,0.3vw + 7px,11px);color:var(--text-3);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:0.35em}
+.invoice-amount-item .value{font-size:clamp(14px,0.7vw + 10px,20px);color:var(--text-1);font-variant-numeric:tabular-nums;letter-spacing:0.01em}
+.invoice-amount-item .value.accent{color:var(--accent-hi)}
+.invoice-pay{display:inline-flex;align-items:center;justify-content:center;gap:0.55em;background:var(--accent);border:1px solid var(--accent);color:var(--surface-0);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;padding:clamp(11px,0.9vw,15px) clamp(16px,1.4vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease}
+.invoice-pay:hover{background:var(--accent-hi);border-color:var(--accent-hi)}
+
+.settled-wrap{background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(8px,0.7vw,14px);overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,0.02) inset,0 16px 40px -24px rgba(0,0,0,0.9)}
+table.settled{width:100%;border-collapse:collapse;font-size:clamp(11px,0.35vw + 9px,14px);table-layout:auto}
+table.settled thead th{text-align:left;padding:clamp(12px,1vw,18px) clamp(12px,1.4vw,22px);font-weight:normal;color:var(--text-3);font-size:clamp(9px,0.3vw + 7px,11px);letter-spacing:0.2em;text-transform:uppercase;background:var(--surface-3);border-bottom:1px solid var(--line-1);user-select:none;white-space:nowrap}
+table.settled thead th:nth-child(1){width:40%}
+table.settled thead th:nth-child(2){width:15%}
+table.settled thead th:nth-child(3){width:20%}
+table.settled thead th:nth-child(4){width:25%}
+table.settled tbody tr{border-bottom:1px solid var(--line-1);transition:background 0.15s ease,opacity 0.3s ease,transform 0.3s ease}
+table.settled tbody tr:last-child{border-bottom:none}
+table.settled tbody tr:hover{background:var(--surface-3)}
+table.settled tbody tr.row-enter{opacity:0;transform:translateX(-6px);animation:rowEnter 0.4s ease forwards}
+@keyframes rowEnter{to{opacity:1;transform:translateX(0)}}
+table.settled tbody tr.row-leave{opacity:0;transform:translateX(6px);pointer-events:none}
+table.settled td{padding:clamp(11px,0.9vw,16px) clamp(12px,1.4vw,22px);color:var(--text-2);word-break:break-all;vertical-align:middle}
+table.settled td.id{color:var(--text-3);font-size:0.92em}
+table.settled td.status{white-space:nowrap}
+table.settled td.amount{color:var(--text-1);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+table.settled td.date{color:var(--text-3);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+table.settled thead th.amount-right,table.settled thead th.date-right{text-align:right}
+.settled-toolbar{display:flex;justify-content:flex-end;margin-bottom:clamp(12px,1.2vw,18px)}
+.download-btn{display:inline-flex;align-items:center;gap:0.55em;background:var(--surface-3);border:1px solid var(--line-2);color:var(--text-1);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,13px);letter-spacing:0.12em;text-transform:uppercase;padding:clamp(10px,0.9vw,14px) clamp(16px,1.4vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease,color 0.2s ease,opacity 0.2s ease}
+.download-btn:hover:not(:disabled){background:var(--surface-4);border-color:var(--accent);color:var(--accent-hi)}
+.download-btn:disabled{opacity:0.45;cursor:not-allowed}
+
+.status-pill{display:inline-flex;align-items:center;gap:0.4em;border-radius:clamp(3px,0.25vw,5px);padding:0.3em 0.85em;font-size:clamp(9px,0.3vw + 7px,11px);letter-spacing:0.14em;text-transform:uppercase;white-space:nowrap}
+.status-pill.settled{background:rgba(110,231,168,0.12);color:var(--good);border:1px solid rgba(110,231,168,0.25)}
+.status-pill.invalid{background:rgba(255,125,125,0.12);color:var(--bad);border:1px solid rgba(255,125,125,0.25)}
+.status-pill.expired{background:rgba(124,128,145,0.12);color:var(--text-3);border:1px solid rgba(124,128,145,0.25)}
+.status-pill.pending{background:rgba(245,199,110,0.12);color:var(--warn);border:1px solid rgba(245,199,110,0.25)}
+.status-pill.processing{background:rgba(142,163,255,0.12);color:var(--accent);border:1px solid rgba(142,163,255,0.25)}
+
+.logout-backdrop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:var(--page-pad-y) var(--page-pad-x);background:rgba(8,9,12,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity 0.28s ease}
+.logout-backdrop.is-open{opacity:1;pointer-events:auto}
+.logout-modal{width:100%;max-width:520px;background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(12px,1.2vw,22px);padding:clamp(28px,3vw,48px) clamp(26px,2.8vw,44px);box-shadow:0 1px 0 rgba(255,255,255,0.03) inset,0 40px 100px -40px rgba(0,0,0,0.95);transform:scale(0.94) translateY(12px);opacity:0;transition:transform 0.42s cubic-bezier(0.22,1,0.36,1),opacity 0.28s ease;text-align:center}
+.logout-backdrop.is-open .logout-modal{transform:scale(1) translateY(0);opacity:1}
+.logout-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--bad);margin-bottom:clamp(14px,1.4vw,22px)}
+.logout-icon i{font-size:clamp(40px,3.4vw,60px);line-height:1}
+.logout-title{font-size:clamp(20px,1.4vw + 10px,30px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.5em}
+.logout-body{font-size:clamp(12px,0.4vw + 9px,15px);color:var(--text-2);line-height:1.6;margin-bottom:clamp(18px,1.8vw,26px)}
+.logout-body strong{color:var(--text-1);font-weight:normal}
+.logout-warning{display:flex;align-items:flex-start;gap:0.7em;background:rgba(245,199,110,0.08);border:1px solid rgba(245,199,110,0.22);border-radius:clamp(8px,0.6vw,12px);padding:clamp(12px,1.1vw,16px) clamp(14px,1.2vw,18px);margin-bottom:clamp(16px,1.6vw,22px);font-size:clamp(11px,0.35vw + 8px,13px);color:var(--warn);line-height:1.5;text-align:left}
+.logout-warning i{font-size:1.2em;flex-shrink:0;margin-top:0.05em}
+.logout-warning span{color:var(--text-2)}
+.logout-key-preview{background:var(--surface-1);border:1px solid var(--line-1);border-radius:clamp(8px,0.6vw,12px);padding:clamp(12px,1.1vw,16px) clamp(14px,1.2vw,18px);font-size:clamp(12px,0.5vw + 9px,15px);color:var(--accent);letter-spacing:0.04em;word-break:break-all;line-height:1.4;margin-bottom:clamp(16px,1.6vw,22px);user-select:all;text-align:left}
+.logout-download{width:100%;margin-bottom:clamp(16px,1.6vw,22px)}
+.logout-download .btn{width:100%}
+.logout-actions{display:flex;gap:clamp(8px,0.8vw,12px);flex-wrap:wrap}
+.btn{flex:1 1 auto;min-width:150px;font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.14em;text-transform:uppercase;padding:clamp(12px,1vw,16px) clamp(16px,1.4vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:0.6em;transition:background 0.2s ease,border-color 0.2s ease,color 0.2s ease,opacity 0.2s ease;text-decoration:none;border:1px solid var(--line-2);background:var(--surface-3);color:var(--text-1)}
+.btn:hover:not(:disabled){background:var(--surface-4);border-color:var(--accent);color:var(--accent-hi)}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.btn.danger{background:rgba(255,125,125,0.12);border-color:rgba(255,125,125,0.3);color:var(--bad)}
+.btn.danger:hover:not(:disabled){background:rgba(255,125,125,0.2);border-color:rgba(255,125,125,0.5);color:var(--bad)}
+.btn.danger.is-locked,.btn.danger.is-locked:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-3);cursor:not-allowed}
+.btn .cooldown-num{font-variant-numeric:tabular-nums;display:inline-block;min-width:1.1em;text-align:center}
+
+.notification-container{position:fixed;top:calc(50px * var(--scale));left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;align-items:center;gap:calc(8px * var(--scale));pointer-events:none}
+.notification{background:rgba(18,22,28,0.95);backdrop-filter:blur(calc(20px * var(--scale)));border-radius:calc(14px * var(--scale));padding:calc(14px * var(--scale)) calc(24px * var(--scale));border:calc(1px * var(--scale)) solid rgba(255,255,255,0.1);box-shadow:0 calc(8px * var(--scale)) calc(32px * var(--scale)) rgba(0,0,0,0.4),0 0 0 calc(1px * var(--scale)) rgba(255,255,255,0.05) inset;display:flex;align-items:center;gap:calc(14px * var(--scale));min-width:calc(320px * var(--scale));max-width:calc(500px * var(--scale));pointer-events:auto;transform:translateY(-120%);opacity:0;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease,margin 0.3s ease;font-family:var(--font-mono);will-change:transform,opacity}
+.notification.show{transform:translateY(0);opacity:1}
+.notification.fade-out{transform:translateY(calc(-20px * var(--scale))) scale(0.95);opacity:0;pointer-events:none;transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),opacity 0.2s ease}
+.notification-icon{width:calc(32px * var(--scale));height:calc(32px * var(--scale));border-radius:calc(10px * var(--scale));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notification-icon i{font-size:calc(19px * var(--scale))}
+.notification.success .notification-icon{background:rgba(39,201,63,0.15);color:#27c93f}
+.notification.error .notification-icon{background:rgba(255,95,86,0.15);color:#ff5f56}
+.notification.warning .notification-icon{background:rgba(255,189,46,0.15);color:#ffbd2e}
+.notification.info .notification-icon{background:rgba(176,206,255,0.15);color:#b0ceff}
+.notification-content{flex:1}
+.notification-title{font-size:calc(14px * var(--scale));font-weight:600;color:white;margin-bottom:calc(2px * var(--scale));letter-spacing:calc(-0.2px * var(--scale))}
+.notification-message{font-size:calc(12px * var(--scale));color:var(--text-secondary);line-height:1.4}
+.notification-close{width:calc(28px * var(--scale));height:calc(28px * var(--scale));border-radius:calc(8px * var(--scale));display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;color:var(--text-muted);transition:all 0.15s ease;flex-shrink:0}
+.notification-close:hover{background:rgba(255,255,255,0.08);color:white}
+.notification-close i{font-size:calc(14px * var(--scale))}
+@media (max-width:550px){.notification{min-width:280px;padding:12px 18px}.notification-container{top:40px;width:90%}}
+#pageLoader{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#14161d}
+#pageLoader::after{content:"";width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--accent);animation:pageSpin 0.8s linear infinite}
+@keyframes pageSpin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="pageLoader" aria-hidden="true"></div>
+<script>
+(function(){var l=document.getElementById("pageLoader"),p=0,f=window.fetch,gone=0;
+window.fetch=function(){p++;var r=f.apply(this,arguments);var d=function(){p--};r.then(d,d);return r};
+function done(){if(!gone){gone=1;l.remove()}}
+function check(){p>0?setTimeout(check,100):done()}
+Promise.all([document.fonts?document.fonts.ready:0,new Promise(function(r){document.readyState==="complete"?r():addEventListener("load",r)})]).then(function(){setTimeout(check,250)});
+setTimeout(done,8000)})();
+</script>
+
+<div class="notification-container" id="notificationContainer"></div>
+
+<div class="container">
+    <div id="topbar-mount">
+    <div class="topbar" id="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-center">
+            <a class="nav-btn" href="."><i class="ph-bold ph-house"></i> Home</a>
+            <a class="nav-btn is-active" href="topup"><i class="ph-bold ph-wallet"></i> Top Up</a>
+            <a class="nav-btn" href="solves"><i class="ph-bold ph-puzzle-piece"></i> Solves</a>
+            <a class="nav-btn" href="subscriptions"><i class="ph-bold ph-crown"></i> Subscriptions</a>
+            <a class="nav-btn" href="preferences"><i class="ph-bold ph-sliders"></i> Preferences</a>
+            <a class="nav-btn" href="docs"><i class="ph-bold ph-book-open"></i> Docs</a>
+            <a class="nav-btn" href="extension"><i class="ph-bold ph-puzzle-piece"></i> Extension</a>
+        </div>
+        <div class="topbar-right">
+            <div class="balance-chip" id="balance-chip">
+                <span class="label">Balance</span>
+                <span class="value" id="balance-value">€0.00</span>
+            </div>
+            <a class="nav-btn auth auth-guest" href="login" id="nav-login">Login</a>
+            <a class="nav-btn auth primary auth-guest" href="register" id="nav-register">Register</a>
+            <button class="nav-btn auth logout auth-user" id="nav-logout" type="button">
+                <i class="ph-bold ph-sign-out"></i> Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+    <h1 class="brand">Top<span class="accent">Up</span></h1>
+
+    <div class="topup-section">
+        <h2 class="topup-title">Create a top-up invoice</h2>
+        <p class="topup-subtitle">LTC is the only Payment Method.</p>
+
+        <div class="topup-row">
+            <div class="topup-input-wrap">
+                <span class="topup-currency">€</span>
+                <input class="topup-input" id="topup-amount" type="text" inputmode="decimal"
+                       autocomplete="off" spellcheck="false" placeholder="0.05 – 500.00" maxlength="7" />
+            </div>
+            <button class="topup-submit" id="topup-create" type="button">
+                <i class="ph-bold ph-receipt"></i> Create Invoice
+            </button>
+        </div>
+
+        <div class="topup-help">Minimum €0.05 | Maximum €500.00.</div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Active invoices</h2>
+            <div class="section-count" id="active-count">-</div>
+        </div>
+        <div id="active-content"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Top-up history</h2>
+            <div class="section-count" id="settled-count">-</div>
+        </div>
+        <div class="settled-toolbar">
+            <button class="download-btn" id="settled-download" type="button" disabled>
+                <i class="ph-bold ph-download-simple"></i> Download JSON
+            </button>
+        </div>
+        <div id="settled-content"></div>
+    </div>
+</div>
+
+<div class="confirm-backdrop" id="confirm-backdrop">
+    <div class="confirm-modal" role="dialog" aria-modal="true">
+        <h2 class="confirm-title">Confirm top-up</h2>
+        <p class="confirm-body">
+            You're about to create an invoice for
+            <span class="amount" id="confirm-amount">€0.00</span>.<br>
+            This generates a fresh LTCPay checkout link. Pay it with LTC and
+            your balance updates automatically.
+        </p>
+        <div class="confirm-actions">
+            <button class="confirm-btn" id="confirm-cancel" type="button">Cancel</button>
+            <button class="confirm-btn primary" id="confirm-go" type="button" disabled>
+                <span id="confirm-go-label">Wait <span class="cooldown-num">3</span>s</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="logout-backdrop" id="logout-backdrop">
+    <div class="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+        <div class="logout-icon"><i class="ph-bold ph-sign-out"></i></div>
+        <h2 class="logout-title" id="logout-title">Log out?</h2>
+        <p class="logout-body">
+            You're about to log out of Gekke Solutions. Your API key will be
+            <strong>removed from this browser's local storage</strong>.
+            If you haven't saved it anywhere else, you'll lose access to
+            this account forever.
+        </p>
+        <div class="logout-warning">
+            <i class="ph-bold ph-warning"></i>
+            <span>Please download your API key before continuing. Without it, this account cannot be recovered.</span>
+        </div>
+        <div class="logout-key-preview" id="logout-key-preview">-</div>
+        <div class="logout-download">
+            <button class="btn" id="logout-download" type="button">
+                <i class="ph-bold ph-download-simple"></i> Download API key
+            </button>
+        </div>
+        <div class="logout-actions">
+            <button class="btn" id="logout-cancel" type="button">Cancel</button>
+            <button class="btn danger is-locked" id="logout-confirm" type="button" aria-disabled="true">
+                <span id="logout-confirm-label">Wait <span class="cooldown-num">5</span>s</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+window.APP = {
+    VpsUrl: "",
+    VpsResolver: "https://imgekkefries.pythonanywhere.com/vps",
+    storageKey: "GekkeSolutionsKey",
+};
+
+window.ready = (async () => {
+    try {
+        const res = await fetch(window.APP.VpsResolver, { cache: "no-store" });
+        const url = (await res.text()).trim();
+        if (url) window.APP.VpsUrl = url;
+    } catch (e) {
+        console.error("Failed to resolve VPS URL", e);
+    }
+})();
+
+window.$ = (sel, root = document) => root.querySelector(sel);
+window.$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+window.getKey = () => localStorage.getItem(window.APP.storageKey);
+window.setKey = (k) => localStorage.setItem(window.APP.storageKey, k);
+window.clearKey = () => localStorage.removeItem(window.APP.storageKey);
+
+window.api = (p) => window.APP.VpsUrl.replace(/\/$/, "") + p;
+
+window.esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    "\"": "&quot;", "'": "&#39;"
+})[c]);
+
+window.postJSON = async (path, body) => {
+    if (window.ready) { try { await window.ready; } catch (e) {} }
+    const res = await fetch(api(path), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+    });
+    return res.json();
+};
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const container = document.getElementById("notificationContainer");
+    let activeNotifications = [];
+    let notificationId = 0;
+
+    function removeNotification(notification, skipAnimation = false) {
+        const id = notification.dataset.id;
+        const index = activeNotifications.findIndex(n => n.id == id);
+        if (index !== -1) {
+            const notif = activeNotifications[index];
+            if (notif.timeout) clearTimeout(notif.timeout);
+            activeNotifications.splice(index, 1);
+        }
+        if (skipAnimation) {
+            if (notification.parentNode) notification.remove();
+            return;
+        }
+        notification.classList.remove("show");
+        notification.classList.add("fade-out");
+        setTimeout(() => { if (notification.parentNode) notification.remove(); }, 250);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    window.showNotification = function (type, title, message, duration = 4000) {
+        const id = ++notificationId;
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.dataset.id = id;
+
+        let iconClass = "info-circle";
+        if (type === "success") iconClass = "check-circle";
+        else if (type === "error") iconClass = "times-circle";
+        else if (type === "warning") iconClass = "exclamation-triangle";
+
+        notification.innerHTML = `
+            <div class="notification-icon"><i class="fas fa-${iconClass}"></i></div>
+            <div class="notification-content">
+                <div class="notification-title">${escapeHtml(title)}</div>
+                <div class="notification-message">${escapeHtml(message)}</div>
+            </div>
+            <button class="notification-close"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(notification);
+
+        notification.querySelector(".notification-close").addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeNotification(notification);
+        });
+
+        requestAnimationFrame(() => requestAnimationFrame(() => notification.classList.add("show")));
+
+        let timeout;
+        if (duration > 0) timeout = setTimeout(() => removeNotification(notification), duration);
+        activeNotifications.push({ id, element: notification, timeout });
+        if (activeNotifications.length > 15) activeNotifications = activeNotifications.slice(-15);
+        return id;
+    };
+
+    window.removeNotification = function (id) {
+        const n = document.querySelector(`.notification[data-id="${id}"]`);
+        if (n) removeNotification(n);
+    };
+
+    window.clearAllNotifications = function () {
+        activeNotifications.forEach(n => {
+            if (n.timeout) clearTimeout(n.timeout);
+            if (n.element.parentNode) {
+                n.element.classList.add("fade-out");
+                setTimeout(() => { if (n.element.parentNode) n.element.remove(); }, 250);
+            }
+        });
+        activeNotifications = [];
+    };
+
+    window.notify = {
+        success: (t, m, d) => window.showNotification("success", t, m, d),
+        error:   (t, m, d) => window.showNotification("error",   t, m, d),
+        warning: (t, m, d) => window.showNotification("warning", t, m, d),
+        info:    (t, m, d) => window.showNotification("info",    t, m, d),
+    };
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const BALANCE_REFRESH_MS = 5000;
+    let lastBalance  = null;
+    let lastKeyState = undefined;
+
+    document.getElementById("nav-logout").addEventListener("click", () => {
+        if (window.openLogoutModal) window.openLogoutModal();
+    });
+
+    function setLoggedInUI(isIn) {
+        const topbar = document.getElementById("topbar");
+        if (topbar) topbar.classList.toggle("is-logged-in", isIn);
+    }
+
+    function formatBalance(n) {
+        return String(Number(n));
+    }
+
+    async function refreshBalance() {
+        const key   = getKey();
+        const chip  = document.getElementById("balance-chip");
+        const value = document.getElementById("balance-value");
+        if (!chip || !value) return;
+
+        if (!key) {
+            if (lastKeyState !== "out") {
+                chip.classList.remove("is-visible");
+                setLoggedInUI(false);
+                lastKeyState = "out";
+                lastBalance  = null;
+            }
+            return;
+        }
+
+        try {
+            const data = await postJSON("/solutions/login", { key });
+
+            if (data.code === 200) {
+                const balance = Number(data.balance) || 0;
+                if (lastKeyState !== "in") {
+                    value.textContent = "€" + formatBalance(balance);
+                    chip.classList.add("is-visible");
+                    setLoggedInUI(true);
+                    lastKeyState = "in";
+                    lastBalance  = balance;
+                } else if (balance !== lastBalance) {
+                    value.textContent = "€" + formatBalance(balance);
+                    lastBalance = balance;
+                    value.classList.add("flash");
+                    setTimeout(() => value.classList.remove("flash"), 700);
+                }
+            } else if (data.code === 401) {
+                if (lastKeyState !== "out") {
+                    clearKey();
+                    chip.classList.remove("is-visible");
+                    setLoggedInUI(false);
+                    lastKeyState = "out";
+                    lastBalance  = null;
+                }
+            }
+        } catch { }
+    }
+
+    window.refreshTopbarBalance = refreshBalance;
+    refreshBalance();
+    setInterval(refreshBalance, BALANCE_REFRESH_MS);
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const COOLDOWN_SECONDS = 5;
+
+    const backdrop     = document.getElementById("logout-backdrop");
+    const keyPreviewEl = document.getElementById("logout-key-preview");
+    const downloadBtn  = document.getElementById("logout-download");
+    const cancelBtn    = document.getElementById("logout-cancel");
+    const confirmBtn   = document.getElementById("logout-confirm");
+    const confirmLabel = document.getElementById("logout-confirm-label");
+
+    let cooldownTimer = null;
+    let cooldownLeft  = 0;
+    let currentKey    = "";
+
+    downloadBtn.addEventListener("click", onDownload);
+    cancelBtn.addEventListener("click", close);
+    confirmBtn.addEventListener("click", onConfirm);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && backdrop.classList.contains("is-open")) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    function open() {
+        currentKey = getKey() || "";
+        if (!currentKey) {
+            notify.info("Not logged in", "There's no active session.");
+            return;
+        }
+        keyPreviewEl.textContent = currentKey;
+        backdrop.classList.add("is-open");
+        startCooldown();
+    }
+
+    function close() {
+        backdrop.classList.remove("is-open");
+        endCooldown();
+    }
+
+    function onDownload() {
+        if (!currentKey) return;
+        const content = [
+            "Gekke Solutions - API Key",
+            "=========================",
+            "",
+            "Key:",
+            currentKey,
+            "",
+            "Saved: " + new Date().toISOString(),
+            "",
+            "Keep this file safe. This key is your login, your identity,",
+            "and your wallet on Gekke Solutions.",
+            "",
+        ].join("\n");
+
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url  = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "gekkesolutions-api-key.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        notify.success("Downloaded", "gekkesolutions-api-key.txt saved.");
+    }
+
+    function startCooldown() {
+        cooldownLeft = COOLDOWN_SECONDS;
+        confirmBtn.classList.add("is-locked");
+        confirmBtn.setAttribute("aria-disabled", "true");
+        renderCooldown();
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = setInterval(() => {
+            cooldownLeft -= 1;
+            if (cooldownLeft <= 0) endCooldown();
+            else renderCooldown();
+        }, 1000);
+    }
+
+    function renderCooldown() {
+        confirmLabel.innerHTML = `Wait <span class="cooldown-num">${cooldownLeft}</span>s`;
+    }
+
+    function endCooldown() {
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = null;
+        if (backdrop.classList.contains("is-open")) {
+            confirmBtn.classList.remove("is-locked");
+            confirmBtn.removeAttribute("aria-disabled");
+            confirmLabel.innerHTML = `<i class="ph-bold ph-sign-out"></i> Log Out`;
+        }
+    }
+
+    function onConfirm() {
+        if (confirmBtn.classList.contains("is-locked")) return;
+        clearKey();
+        const topbar = document.getElementById("topbar");
+        const chip   = document.getElementById("balance-chip");
+        if (topbar) topbar.classList.remove("is-logged-in");
+        if (chip)   chip.classList.remove("is-visible");
+        close();
+        notify.success("Logged out", "Your API key was removed from this browser.");
+        if (window.onLoggedOut) window.onLoggedOut();
+    }
+
+    window.openLogoutModal  = open;
+    window.closeLogoutModal = close;
+})();
+</script>
+
+<script>
+function statusPill(status) {
+    const s = String(status || "").toLowerCase();
+    const label = esc(status || "-");
+    if (s === "settled")    return `<span class="status-pill settled">Settled</span>`;
+    if (s === "invalid")    return `<span class="status-pill invalid">Invalid</span>`;
+    if (s === "expired")    return `<span class="status-pill expired">Expired</span>`;
+    if (s === "processing") return `<span class="status-pill processing">Processing</span>`;
+    if (s === "new")        return `<span class="status-pill pending">New</span>`;
+    return `<span class="status-pill expired">${label}</span>`;
+}
+
+function formatDate(unix) {
+    if (!unix) return "-";
+    const d = new Date(unix * 1000);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+(function () {
+    "use strict";
+
+    const MIN = 0.05;
+    const MAX = 500.00;
+    const DEC = 2;
+
+    const inputEl   = document.getElementById("topup-amount");
+    const createBtn = document.getElementById("topup-create");
+
+    createBtn.addEventListener("click", onCreate);
+    inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") onCreate(); });
+    inputEl.addEventListener("input", onInput);
+
+    function onInput() {
+        const el = inputEl;
+        const before = el.value;
+        const caret  = el.selectionStart;
+
+        let cleaned = before.replace(/[^\d.]/g, "");
+
+        const firstDot = cleaned.indexOf(".");
+        if (firstDot !== -1) {
+            cleaned = cleaned.slice(0, firstDot + 1)
+                    + cleaned.slice(firstDot + 1).replace(/\./g, "");
+        }
+
+        const dot = cleaned.indexOf(".");
+        if (dot !== -1 && cleaned.length - dot - 1 > DEC) {
+            cleaned = cleaned.slice(0, dot + 1 + DEC);
+        }
+
+        if (cleaned.length > 7) cleaned = cleaned.slice(0, 7);
+
+        if (cleaned !== before) {
+            const removedBefore = countRemovedBefore(before, cleaned, caret);
+            el.value = cleaned;
+            const newPos = Math.max(0, caret - removedBefore);
+            el.setSelectionRange(newPos, newPos);
+        }
+    }
+
+    function countRemovedBefore(before, after, caret) {
+        const headBefore = before.slice(0, caret);
+        let survived = 0;
+        let j = 0;
+        for (let i = 0; i < headBefore.length && j < after.length; i++) {
+            if (headBefore[i] === after[j]) { survived++; j++; }
+        }
+        return Math.max(0, headBefore.length - survived);
+    }
+
+    function parseAmount() {
+        const raw = (inputEl.value || "").trim();
+        if (!raw) return { ok: false, error: "Enter an amount." };
+        if (raw === ".") return { ok: false, error: "Enter a valid amount." };
+
+        const value = Number(raw);
+        if (!isFinite(value)) return { ok: false, error: "Amount must be a number." };
+        if (value < MIN)      return { ok: false, error: `Minimum is €${MIN.toFixed(2)}.` };
+        if (value > MAX)      return { ok: false, error: `Maximum is €${MAX.toFixed(2)}.` };
+
+        const dotIdx = raw.indexOf(".");
+        if (dotIdx !== -1 && raw.length - dotIdx - 1 > DEC) {
+            return { ok: false, error: `At most ${DEC} decimals allowed.` };
+        }
+        return { ok: true, value };
+    }
+
+    function onCreate() {
+        if (!getKey()) {
+            notify.warning("Not logged in", "Please log in first.");
+            return;
+        }
+        const parsed = parseAmount();
+        if (!parsed.ok) {
+            notify.warning("Invalid amount", parsed.error);
+            return;
+        }
+        window.openConfirmTopUp(parsed.value);
+    }
+})();
+
+(function () {
+    "use strict";
+
+    const COOLDOWN_SECONDS = 3;
+
+    const backdrop  = document.getElementById("confirm-backdrop");
+    const amountEl  = document.getElementById("confirm-amount");
+    const cancelBtn = document.getElementById("confirm-cancel");
+    const goBtn     = document.getElementById("confirm-go");
+    const goLabel   = document.getElementById("confirm-go-label");
+
+    let cooldownTimer = null;
+    let cooldownLeft  = 0;
+    let pendingAmount = 0;
+
+    cancelBtn.addEventListener("click", close);
+    goBtn.addEventListener("click", onConfirm);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && backdrop.classList.contains("is-open")) close();
+    });
+    backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+
+    window.openConfirmTopUp = function (amount) {
+        pendingAmount = amount;
+        amountEl.textContent = "€" + amount.toFixed(2);
+        backdrop.classList.add("is-open");
+        startCooldown();
+    };
+
+    function close() {
+        backdrop.classList.remove("is-open");
+        endCooldown();
+    }
+
+    function startCooldown() {
+        cooldownLeft = COOLDOWN_SECONDS;
+        goBtn.disabled = true;
+        renderCooldown();
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = setInterval(() => {
+            cooldownLeft -= 1;
+            if (cooldownLeft <= 0) endCooldown();
+            else renderCooldown();
+        }, 1000);
+    }
+
+    function renderCooldown() {
+        goLabel.innerHTML = `Wait <span class="cooldown-num">${cooldownLeft}</span>s`;
+    }
+
+    function endCooldown() {
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = null;
+        if (backdrop.classList.contains("is-open")) {
+            goBtn.disabled = false;
+            goLabel.textContent = "Yes, create invoice";
+        }
+    }
+
+    async function onConfirm() {
+        if (goBtn.disabled) return;
+
+        goBtn.disabled = true;
+        const original = goLabel.textContent;
+        goLabel.innerHTML = `<i class="ph-bold ph-circle-notch"></i> Creating…`;
+
+        const key = getKey();
+        if (!key) {
+            notify.error("Not logged in", "Please log in first.");
+            close();
+            return;
+        }
+
+        try {
+            const data = await postJSON("/solutions/invoice", { key, amount: pendingAmount.toFixed(2) });
+
+            if (data.code === 201) {
+                notify.success("Invoice created", "Opening LTCPay checkout in a new tab.");
+                window.open(data.checkout, "_blank", "noopener,noreferrer");
+                close();
+                if (window.refreshInvoices) window.refreshInvoices();
+            } else if (data.code === 400 && data.error === "active invoice limit reached") {
+                notify.warning("Active invoice limit", `You already have ${data.active}/${data.max_active} active invoices.`);
+                close();
+            } else {
+                notify.error("Create failed", data.error || "Something went wrong.");
+                goLabel.textContent = original;
+                goBtn.disabled = false;
+            }
+        } catch (err) {
+            notify.error("Network error", err.message || "Couldn't reach the server.");
+            goLabel.textContent = original;
+            goBtn.disabled = false;
+        }
+    }
+})();
+
+(function () {
+    "use strict";
+
+    const contentEl = document.getElementById("active-content");
+    const countEl   = document.getElementById("active-count");
+
+    let active    = [];
+    let gridEl    = null;
+    let cardMap   = new Map();
+    let firstPass = true;
+
+    function buildCard(inv) {
+        const card = document.createElement("div");
+        card.className = "invoice-card card-enter";
+        card.dataset.id = String(inv.id);
+        card.innerHTML = `
+            <div class="invoice-card-top">
+                <div class="invoice-id"></div>
+                <div class="invoice-status"></div>
+            </div>
+            <div class="invoice-amounts">
+                <div class="invoice-amount-item">
+                    <div class="label">Amount</div>
+                    <div class="value accent"></div>
+                </div>
+                <div class="invoice-amount-item">
+                    <div class="label">In LTC</div>
+                    <div class="value"></div>
+                </div>
+            </div>
+            <a class="invoice-pay" target="_blank" rel="noopener noreferrer">
+                <i class="ph-bold ph-arrow-square-out"></i> Pay
+            </a>
+        `;
+        card.addEventListener("animationend", () => card.classList.remove("card-enter"), { once: true });
+        return card;
+    }
+
+    function updateCard(card, inv) {
+        const idEl = card.querySelector(".invoice-id");
+        const idText = String(inv.id ?? "");
+        if (idEl.textContent !== idText) idEl.textContent = idText;
+
+        const statusEl = card.querySelector(".invoice-status");
+        const statusText = String(inv.status || "New");
+        if (statusEl.textContent.trim() !== statusText) statusEl.textContent = statusText;
+        statusEl.classList.toggle("status-processing", inv.status === "Processing");
+
+        const eurEl = card.querySelector(".invoice-amount-item .value.accent");
+        const eurText = "€" + Number(inv.eur_amount || 0).toFixed(2);
+        if (eurEl.textContent !== eurText) eurEl.textContent = eurText;
+
+        const ltcEl = card.querySelector(".invoice-amount-item:nth-child(2) .value");
+        const ltcText = Number(inv.ltc_amount || 0).toFixed(8);
+        if (ltcEl.textContent !== ltcText) ltcEl.textContent = ltcText;
+
+        const payEl = card.querySelector(".invoice-pay");
+        if (inv.checkoutLink) {
+            if (payEl.getAttribute("href") !== inv.checkoutLink) payEl.setAttribute("href", inv.checkoutLink);
+            payEl.style.display = "";
+        } else {
+            payEl.style.display = "none";
+        }
+    }
+
+    function render() {
+        countEl.textContent = `${active.length} active`;
+
+        if (!active.length) {
+            if (gridEl) {
+                Array.from(cardMap.values()).forEach(card => {
+                    card.classList.add("card-leave");
+                    setTimeout(() => card.remove(), 350);
+                });
+                cardMap.clear();
+                gridEl.remove();
+                gridEl = null;
+            }
+            if (!contentEl.querySelector(".section-empty")) {
+                contentEl.innerHTML = `<div class="section-empty">No active invoices.</div>`;
+            }
+            firstPass = false;
+            return;
+        }
+
+        const placeholder = contentEl.querySelector(".section-empty");
+        if (placeholder) placeholder.remove();
+
+        if (!gridEl) {
+            gridEl = document.createElement("div");
+            gridEl.className = "invoice-grid";
+            contentEl.appendChild(gridEl);
+            cardMap = new Map();
+        }
+
+        const seen = new Set();
+
+        active.forEach((inv, idx) => {
+            const id = String(inv.id);
+            seen.add(id);
+
+            let card = cardMap.get(id);
+            if (!card) {
+                card = buildCard(inv);
+                if (firstPass) card.classList.remove("card-enter");
+                cardMap.set(id, card);
+                const at = gridEl.children[idx];
+                if (at) gridEl.insertBefore(card, at);
+                else gridEl.appendChild(card);
+            } else {
+                const at = gridEl.children[idx];
+                if (at !== card) gridEl.insertBefore(card, at || null);
+            }
+            updateCard(card, inv);
+        });
+
+        cardMap.forEach((card, id) => {
+            if (!seen.has(id)) {
+                card.classList.add("card-leave");
+                setTimeout(() => card.remove(), 350);
+                cardMap.delete(id);
+            }
+        });
+
+        firstPass = false;
+    }
+
+    window.updateActiveInvoices = function (list) {
+        active = Array.isArray(list) ? list : [];
+        render();
+    };
+})();
+
+(function () {
+    "use strict";
+
+    const contentEl  = document.getElementById("settled-content");
+    const countEl    = document.getElementById("settled-count");
+    const downloadEl = document.getElementById("settled-download");
+
+    let settled   = [];
+    let tableEl   = null;
+    let tbodyEl   = null;
+    let rowMap    = new Map();
+    let firstPass = true;
+
+    downloadEl.addEventListener("click", onDownload);
+
+    function buildTable() {
+        const wrap = document.createElement("div");
+        wrap.className = "settled-wrap";
+        wrap.innerHTML = `
+            <table class="settled">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th class="amount-right">Amount</th>
+                        <th class="date-right">Created</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        `;
+        return wrap;
+    }
+
+    function buildRow(inv) {
+        const tr = document.createElement("tr");
+        tr.dataset.id = String(inv.id);
+        tr.className = "row-enter";
+        tr.innerHTML = `
+            <td class="id"></td>
+            <td class="status"></td>
+            <td class="amount"></td>
+            <td class="date"></td>
+        `;
+        tr.addEventListener("animationend", () => tr.classList.remove("row-enter"), { once: true });
+        return tr;
+    }
+
+    function updateRow(tr, inv) {
+        const idCell = tr.querySelector("td.id");
+        const idText = String(inv.id ?? "");
+        if (idCell.textContent !== idText) idCell.textContent = idText;
+
+        const statusCell = tr.querySelector("td.status");
+        if (statusCell.dataset.status !== String(inv.status)) {
+            statusCell.dataset.status = String(inv.status);
+            statusCell.innerHTML = statusPill(inv.status);
+        }
+
+        const amountCell = tr.querySelector("td.amount");
+        const amountText = "€" + Number(inv.eur_amount || 0).toFixed(2);
+        if (amountCell.textContent !== amountText) amountCell.textContent = amountText;
+
+        const dateCell = tr.querySelector("td.date");
+        const dateText = formatDate(inv.createdTime);
+        if (dateCell.textContent !== dateText) dateCell.textContent = dateText;
+    }
+
+    function render() {
+        countEl.textContent = `${settled.length} total`;
+
+        if (!settled.length) {
+            if (tableEl) {
+                rowMap.forEach(tr => tr.remove());
+                rowMap.clear();
+                tableEl.remove();
+                tableEl = null;
+                tbodyEl = null;
+            }
+            if (!contentEl.querySelector(".section-empty")) {
+                contentEl.innerHTML = `<div class="section-empty">No top-ups yet.</div>`;
+            }
+            downloadEl.disabled = true;
+            firstPass = false;
+            return;
+        }
+
+        const placeholder = contentEl.querySelector(".section-empty");
+        if (placeholder) placeholder.remove();
+
+        if (!tableEl) {
+            tableEl = buildTable();
+            contentEl.appendChild(tableEl);
+            tbodyEl = tableEl.querySelector("tbody");
+            rowMap  = new Map();
+        }
+
+        const seen = new Set();
+
+        settled.forEach((inv, idx) => {
+            const id = String(inv.id);
+            seen.add(id);
+
+            let tr = rowMap.get(id);
+            if (!tr) {
+                tr = buildRow(inv);
+                if (firstPass) tr.classList.remove("row-enter");
+                rowMap.set(id, tr);
+                const at = tbodyEl.children[idx];
+                if (at) tbodyEl.insertBefore(tr, at);
+                else tbodyEl.appendChild(tr);
+            } else {
+                const at = tbodyEl.children[idx];
+                if (at !== tr) tbodyEl.insertBefore(tr, at || null);
+            }
+            updateRow(tr, inv);
+        });
+
+        rowMap.forEach((tr, id) => {
+            if (!seen.has(id)) {
+                tr.classList.add("row-leave");
+                setTimeout(() => tr.remove(), 350);
+                rowMap.delete(id);
+            }
+        });
+
+        downloadEl.disabled = false;
+        firstPass = false;
+    }
+
+    function onDownload() {
+        if (!settled.length) return;
+
+        const payload = {
+            exported_at: new Date().toISOString(),
+            count: settled.length,
+            invoices: settled,
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url  = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `gekkesolutions-topups-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        notify.success("Downloaded", `${settled.length} top-up${settled.length === 1 ? "" : "s"} exported.`);
+    }
+
+    window.updateSettledInvoices = function (list) {
+        settled = Array.isArray(list) ? list : [];
+        render();
+    };
+})();
+
+(function () {
+    "use strict";
+
+    async function fetchInvoices() {
+        const key = getKey();
+        if (!key) {
+            window.updateActiveInvoices([]);
+            window.updateSettledInvoices([]);
+            return;
+        }
+
+        try {
+            const data = await postJSON("/solutions/invoices", { key });
+
+            if (data.code === 200) {
+                window.updateActiveInvoices(data.active || []);
+                window.updateSettledInvoices(data.settled || []);
+            } else if (data.code === 401) {
+                clearKey();
+                window.updateActiveInvoices([]);
+                window.updateSettledInvoices([]);
+            } else {
+                notify.error("Failed to load invoices", data.error || "Something went wrong.");
+            }
+        } catch (err) {
+        }
+    }
+
+    window.refreshInvoices = fetchInvoices;
+    window.onLoggedOut = () => {
+        window.updateActiveInvoices([]);
+        window.updateSettledInvoices([]);
+    };
+
+    fetchInvoices();
+    setInterval(fetchInvoices, 10000);
+})();
+</script>
+
+</body>
+</html>

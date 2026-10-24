@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+(function(){
+  var KNOWN=['solves','login','register','topup','preferences','docs','extension','subscriptions'];
+  var parts=location.pathname.split('/').filter(Boolean);
+  if(parts.length && parts[parts.length-1]==='index.html')parts.pop();
+  if(parts.length && KNOWN.indexOf(parts[parts.length-1])!==-1)parts.pop();
+  var root='/'+(parts.length?parts.join('/')+'/':'');
+  window.__appRoot=root;
+  var b=document.createElement('base');b.href=root;
+  document.head.insertBefore(b,document.head.firstChild);
+})();
+</script>
+<title>Gekke.org ~ Solutions</title>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<style>
+@font-face{font-family:"Terminal";src:url("https://imgekkefries.pythonanywhere.com/terminal.woff") format("woff");font-weight:normal;font-style:normal;font-display:swap}
+:root{
+--surface-0:#0e0f13;--surface-1:#15161c;--surface-2:#1b1d24;--surface-3:#22242d;--surface-4:#2a2d38;
+--line-1:#262932;--line-2:#323641;
+--text-1:#f4f5f8;--text-2:#b9bcc8;--text-3:#7c8091;--text-4:#50535e;
+--accent:#8ea3ff;--accent-hi:#ffffff;--good:#6ee7a8;--warn:#f5c76e;--bad:#ff7d7d;
+--page-max:1400px;--page-pad-x:clamp(16px,2.4vw,48px);--page-pad-y:clamp(24px,3vw,56px);
+--scale:1;--font-mono:"Terminal","SF Mono",Menlo,Consolas,monospace;
+--text-secondary:var(--text-2);--text-muted:var(--text-3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161d;color:var(--text-1);font-family:"Terminal","SF Mono",Menlo,Consolas,monospace;font-size:clamp(12px,0.5vw + 10px,17px);line-height:1.5;letter-spacing:0.01em;-webkit-font-smoothing:antialiased;padding:var(--page-pad-y) var(--page-pad-x);min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px}
+::selection{background:var(--accent);color:var(--surface-0)}
+html{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}
+.container{max-width:var(--page-max);margin:0 auto;position:relative;z-index:1;width:100%}
+.brand{font-size:clamp(36px,6.5vw,130px);letter-spacing:0.02em;color:var(--text-1);margin-bottom:clamp(20px,3vw,56px);line-height:1;font-weight:normal;user-select:none;animation:brandIn 0.6s ease both}
+.brand .accent{color:var(--text-3)}
+@keyframes brandIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+body{display:flex;align-items:center;justify-content:center}
+.brand-link{display:inline-block;font-size:clamp(28px,4vw,56px);letter-spacing:0.02em;color:var(--text-1);text-decoration:none;line-height:1;margin-bottom:clamp(24px,3vw,40px);user-select:none;transition:opacity 0.2s ease}
+.brand-link:hover{opacity:0.85}
+.brand-link .accent{color:var(--text-3)}
+.auth-wrap{max-width:520px;margin:0 auto;position:relative;z-index:1;animation:authIn 0.5s ease both}
+@keyframes authIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.auth-card{background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(10px,1vw,18px);padding:clamp(28px,3vw,48px) clamp(26px,2.8vw,44px);box-shadow:0 1px 0 rgba(255,255,255,0.02) inset,0 24px 64px -32px rgba(0,0,0,0.9)}
+.auth-title{font-size:clamp(22px,1.6vw + 12px,34px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.35em}
+.auth-subtitle{font-size:clamp(12px,0.4vw + 9px,15px);color:var(--text-3);margin-bottom:clamp(24px,2.4vw,36px);letter-spacing:0.02em;line-height:1.6}
+.auth-field{margin-bottom:clamp(14px,1.4vw,20px)}
+.auth-label{display:block;font-size:clamp(10px,0.35vw + 8px,12px);color:var(--text-3);text-transform:uppercase;letter-spacing:0.22em;margin-bottom:clamp(6px,0.6vw,10px)}
+.auth-input{width:100%;background:var(--surface-1);border:1px solid var(--line-1);color:var(--text-1);font-family:inherit;font-size:clamp(13px,0.4vw + 10px,16px);padding:clamp(12px,1vw,16px) clamp(14px,1.2vw,18px);border-radius:clamp(6px,0.5vw,10px);outline:none;transition:border-color 0.2s ease,background 0.2s ease;letter-spacing:0.02em}
+.auth-input:focus{border-color:var(--accent);background:var(--surface-2)}
+.auth-input::placeholder{color:var(--text-4)}
+.auth-actions{margin-top:clamp(22px,2vw,32px)}
+.auth-submit{width:100%;background:var(--accent);border:1px solid var(--accent);color:var(--surface-0);font-family:inherit;font-size:clamp(12px,0.4vw + 9px,15px);font-weight:600;letter-spacing:0.16em;text-transform:uppercase;padding:clamp(13px,1.1vw,18px) clamp(16px,1.4vw,24px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease,opacity 0.2s ease;display:inline-flex;align-items:center;justify-content:center;gap:0.6em}
+.auth-submit:hover:not(:disabled){background:var(--accent-hi);border-color:var(--accent-hi)}
+.auth-submit:disabled{opacity:0.55;cursor:not-allowed}
+.auth-switch{margin-top:clamp(22px,2vw,32px);text-align:center;font-size:clamp(11px,0.35vw + 8px,14px);color:var(--text-3)}
+.auth-switch a{color:var(--accent);text-decoration:none;transition:color 0.15s ease}
+.auth-switch a:hover{color:var(--accent-hi)}
+
+.notification-container{position:fixed;top:calc(50px * var(--scale));left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;align-items:center;gap:calc(8px * var(--scale));pointer-events:none}
+.notification{background:rgba(18,22,28,0.95);backdrop-filter:blur(calc(20px * var(--scale)));border-radius:calc(14px * var(--scale));padding:calc(14px * var(--scale)) calc(24px * var(--scale));border:calc(1px * var(--scale)) solid rgba(255,255,255,0.1);box-shadow:0 calc(8px * var(--scale)) calc(32px * var(--scale)) rgba(0,0,0,0.4),0 0 0 calc(1px * var(--scale)) rgba(255,255,255,0.05) inset;display:flex;align-items:center;gap:calc(14px * var(--scale));min-width:calc(320px * var(--scale));max-width:calc(500px * var(--scale));pointer-events:auto;transform:translateY(-120%);opacity:0;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease,margin 0.3s ease;font-family:var(--font-mono);will-change:transform,opacity}
+.notification.show{transform:translateY(0);opacity:1}
+.notification.fade-out{transform:translateY(calc(-20px * var(--scale))) scale(0.95);opacity:0;pointer-events:none;transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),opacity 0.2s ease}
+.notification-icon{width:calc(32px * var(--scale));height:calc(32px * var(--scale));border-radius:calc(10px * var(--scale));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notification-icon i{font-size:calc(19px * var(--scale))}
+.notification.success .notification-icon{background:rgba(39,201,63,0.15);color:#27c93f}
+.notification.error .notification-icon{background:rgba(255,95,86,0.15);color:#ff5f56}
+.notification.warning .notification-icon{background:rgba(255,189,46,0.15);color:#ffbd2e}
+.notification.info .notification-icon{background:rgba(176,206,255,0.15);color:#b0ceff}
+.notification-content{flex:1}
+.notification-title{font-size:calc(14px * var(--scale));font-weight:600;color:white;margin-bottom:calc(2px * var(--scale));letter-spacing:calc(-0.2px * var(--scale))}
+.notification-message{font-size:calc(12px * var(--scale));color:var(--text-secondary);line-height:1.4}
+.notification-close{width:calc(28px * var(--scale));height:calc(28px * var(--scale));border-radius:calc(8px * var(--scale));display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;color:var(--text-muted);transition:all 0.15s ease;flex-shrink:0}
+.notification-close:hover{background:rgba(255,255,255,0.08);color:white}
+.notification-close i{font-size:calc(14px * var(--scale))}
+@media (max-width:550px){.notification{min-width:280px;padding:12px 18px}.notification-container{top:40px;width:90%}}
+#pageLoader{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#14161d}
+#pageLoader::after{content:"";width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--accent);animation:pageSpin 0.8s linear infinite}
+@keyframes pageSpin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="pageLoader" aria-hidden="true"></div>
+<script>
+(function(){var l=document.getElementById("pageLoader"),p=0,f=window.fetch,gone=0;
+window.fetch=function(){p++;var r=f.apply(this,arguments);var d=function(){p--};r.then(d,d);return r};
+function done(){if(!gone){gone=1;l.remove()}}
+function check(){p>0?setTimeout(check,100):done()}
+Promise.all([document.fonts?document.fonts.ready:0,new Promise(function(r){document.readyState==="complete"?r():addEventListener("load",r)})]).then(function(){setTimeout(check,250)});
+setTimeout(done,8000)})();
+</script>
+
+<div class="notification-container" id="notificationContainer"></div>
+
+<div class="container">
+    <div class="auth-wrap">
+        <a class="brand-link" href=".">Gekke<span class="accent">Solutions</span></a>
+
+        <div class="auth-card">
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Enter your API key to access your account.</p>
+
+            <form id="login-form" autocomplete="off">
+                <div class="auth-field">
+                    <label class="auth-label" for="login-key">API Key</label>
+                    <input class="auth-input" id="login-key" type="text" placeholder="paste your 45-character key" spellcheck="false" />
+                </div>
+                <div class="auth-actions">
+                    <button class="auth-submit" id="login-submit" type="submit">
+                        <i class="ph-bold ph-sign-in"></i> Log In
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-switch">
+                Don't have an account? <a href="register">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+window.APP = {
+    VpsUrl: "",
+    VpsResolver: "https://imgekkefries.pythonanywhere.com/vps",
+    storageKey: "GekkeSolutionsKey",
+};
+
+window.ready = (async () => {
+    try {
+        const res = await fetch(window.APP.VpsResolver, { cache: "no-store" });
+        const url = (await res.text()).trim();
+        if (url) window.APP.VpsUrl = url;
+    } catch (e) {
+        console.error("Failed to resolve VPS URL", e);
+    }
+})();
+
+window.$ = (sel, root = document) => root.querySelector(sel);
+window.$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+window.getKey = () => localStorage.getItem(window.APP.storageKey);
+window.setKey = (k) => localStorage.setItem(window.APP.storageKey, k);
+window.clearKey = () => localStorage.removeItem(window.APP.storageKey);
+
+window.api = (p) => window.APP.VpsUrl.replace(/\/$/, "") + p;
+
+window.esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    "\"": "&quot;", "'": "&#39;"
+})[c]);
+
+window.postJSON = async (path, body) => {
+    if (window.ready) { try { await window.ready; } catch (e) {} }
+    const res = await fetch(api(path), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+    });
+    return res.json();
+};
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const container = document.getElementById("notificationContainer");
+    let activeNotifications = [];
+    let notificationId = 0;
+
+    function removeNotification(notification, skipAnimation = false) {
+        const id = notification.dataset.id;
+        const index = activeNotifications.findIndex(n => n.id == id);
+        if (index !== -1) {
+            const notif = activeNotifications[index];
+            if (notif.timeout) clearTimeout(notif.timeout);
+            activeNotifications.splice(index, 1);
+        }
+        if (skipAnimation) {
+            if (notification.parentNode) notification.remove();
+            return;
+        }
+        notification.classList.remove("show");
+        notification.classList.add("fade-out");
+        setTimeout(() => { if (notification.parentNode) notification.remove(); }, 250);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    window.showNotification = function (type, title, message, duration = 4000) {
+        const id = ++notificationId;
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.dataset.id = id;
+
+        let iconClass = "info-circle";
+        if (type === "success") iconClass = "check-circle";
+        else if (type === "error") iconClass = "times-circle";
+        else if (type === "warning") iconClass = "exclamation-triangle";
+
+        notification.innerHTML = `
+            <div class="notification-icon"><i class="fas fa-${iconClass}"></i></div>
+            <div class="notification-content">
+                <div class="notification-title">${escapeHtml(title)}</div>
+                <div class="notification-message">${escapeHtml(message)}</div>
+            </div>
+            <button class="notification-close"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(notification);
+
+        notification.querySelector(".notification-close").addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeNotification(notification);
+        });
+
+        requestAnimationFrame(() => requestAnimationFrame(() => notification.classList.add("show")));
+
+        let timeout;
+        if (duration > 0) timeout = setTimeout(() => removeNotification(notification), duration);
+        activeNotifications.push({ id, element: notification, timeout });
+        if (activeNotifications.length > 15) activeNotifications = activeNotifications.slice(-15);
+        return id;
+    };
+
+    window.removeNotification = function (id) {
+        const n = document.querySelector(`.notification[data-id="${id}"]`);
+        if (n) removeNotification(n);
+    };
+
+    window.clearAllNotifications = function () {
+        activeNotifications.forEach(n => {
+            if (n.timeout) clearTimeout(n.timeout);
+            if (n.element.parentNode) {
+                n.element.classList.add("fade-out");
+                setTimeout(() => { if (n.element.parentNode) n.element.remove(); }, 250);
+            }
+        });
+        activeNotifications = [];
+    };
+
+    window.notify = {
+        success: (t, m, d) => window.showNotification("success", t, m, d),
+        error:   (t, m, d) => window.showNotification("error",   t, m, d),
+        warning: (t, m, d) => window.showNotification("warning", t, m, d),
+        info:    (t, m, d) => window.showNotification("info",    t, m, d),
+    };
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const form   = document.getElementById("login-form");
+    const submit = document.getElementById("login-submit");
+    const input  = document.getElementById("login-key");
+
+    const existing = getKey();
+    if (existing) input.value = existing;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const key = input.value.trim();
+        if (!key) {
+            notify.warning("Missing key", "Please paste your API key.");
+            return;
+        }
+
+        submit.disabled = true;
+        const original = submit.innerHTML;
+        submit.innerHTML = `<i class="ph-bold ph-circle-notch"></i> Logging in…`;
+
+        try {
+            const data = await postJSON("/solutions/login", { key });
+
+            if (data.code === 200) {
+                setKey(key);
+                notify.success("Logged in", "Welcome back. Redirecting…");
+                setTimeout(() => { window.location.href = window.__appRoot || "/"; }, 700);
+            } else if (data.code === 401) {
+                notify.error("Invalid key", "That API key doesn't exist.");
+            } else if (data.code === 400) {
+                notify.error("Bad request", data.error || "Missing key.");
+            } else {
+                notify.error("Login failed", data.error || "Something went wrong.");
+            }
+        } catch (err) {
+            notify.error("Network error", err.message || "Couldn't reach the server.");
+        } finally {
+            submit.disabled = false;
+            submit.innerHTML = original;
+        }
+    });
+})();
+</script>
+
+</body>
+</html>

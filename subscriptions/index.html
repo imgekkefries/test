@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+(function(){
+  var KNOWN=['solves','login','register','topup','preferences','docs','extension','subscriptions'];
+  var parts=location.pathname.split('/').filter(Boolean);
+  if(parts.length && parts[parts.length-1]==='index.html')parts.pop();
+  if(parts.length && KNOWN.indexOf(parts[parts.length-1])!==-1)parts.pop();
+  var root='/'+(parts.length?parts.join('/')+'/':'');
+  window.__appRoot=root;
+  var b=document.createElement('base');b.href=root;
+  document.head.insertBefore(b,document.head.firstChild);
+})();
+</script>
+<title>Gekke.org ~ Solutions</title>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+@font-face{font-family:"Terminal";src:url("https://imgekkefries.pythonanywhere.com/terminal.woff") format("woff");font-weight:normal;font-style:normal;font-display:swap}
+:root{
+--surface-0:#0e0f13;--surface-1:#15161c;--surface-2:#1b1d24;--surface-3:#22242d;--surface-4:#2a2d38;
+--line-1:#262932;--line-2:#323641;
+--text-1:#f4f5f8;--text-2:#b9bcc8;--text-3:#7c8091;--text-4:#50535e;
+--accent:#8ea3ff;--accent-hi:#ffffff;--good:#6ee7a8;--warn:#f5c76e;--bad:#ff7d7d;
+--page-max:1400px;--page-pad-x:clamp(16px,2.4vw,48px);--page-pad-y:clamp(24px,3vw,56px);
+--scale:1;--font-mono:"Terminal","SF Mono",Menlo,Consolas,monospace;
+--text-secondary:var(--text-2);--text-muted:var(--text-3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161d;color:var(--text-1);font-family:"Terminal","SF Mono",Menlo,Consolas,monospace;font-size:clamp(12px,0.5vw + 10px,17px);line-height:1.5;letter-spacing:0.01em;-webkit-font-smoothing:antialiased;padding:var(--page-pad-y) var(--page-pad-x);min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px}
+::selection{background:var(--accent);color:var(--surface-0)}
+html{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}
+.container{max-width:var(--page-max);margin:0 auto;position:relative;z-index:1;width:100%}
+.brand{font-size:clamp(36px,6.5vw,130px);letter-spacing:0.02em;color:var(--text-1);margin-bottom:clamp(20px,3vw,56px);line-height:1;font-weight:normal;user-select:none;animation:brandIn 0.6s ease both}
+.brand .accent{color:var(--text-3)}
+@keyframes brandIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:clamp(12px,2vw,32px);margin-bottom:clamp(28px,4vw,64px);padding-bottom:clamp(14px,1.6vw,22px);border-bottom:1px solid var(--line-1);animation:fadeDown 0.5s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.topbar-left{flex:1;display:flex;align-items:center;gap:clamp(6px,0.8vw,12px)}
+.topbar-center{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px)}
+.topbar-right{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,0.8vw,12px)}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--text-3);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.12em;text-transform:uppercase;padding:clamp(8px,0.7vw,12px) clamp(14px,1.2vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:color 0.2s ease,background 0.2s ease,border-color 0.2s ease;text-decoration:none;display:inline-flex;align-items:center;gap:0.5em;position:relative}
+.nav-btn i{font-size:1.3em;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.nav-btn:hover{color:var(--text-1);background:var(--surface-2)}
+.nav-btn.is-active{color:var(--text-1);background:var(--surface-3);border-color:var(--line-2)}
+.nav-btn.auth{background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-2)}
+.nav-btn.auth:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-1)}
+.nav-btn.auth.primary{background:var(--accent);border-color:var(--accent);color:var(--surface-0);font-weight:600}
+.nav-btn.auth.primary:hover{background:var(--accent-hi);border-color:var(--accent-hi)}
+.nav-btn.auth.logout{background:rgba(255,125,125,0.08);border-color:rgba(255,125,125,0.25);color:var(--bad)}
+.nav-btn.auth.logout:hover{background:rgba(255,125,125,0.14);border-color:rgba(255,125,125,0.4);color:var(--bad)}
+.balance-chip{display:none;align-items:center;gap:0.55em;background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-1);padding:clamp(7px,0.65vw,11px) clamp(12px,1.1vw,20px);border-radius:clamp(6px,0.5vw,10px);font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.05em;font-variant-numeric:tabular-nums}
+.balance-chip.is-visible{display:inline-flex;animation:chipIn 0.35s ease both}
+@keyframes chipIn{from{opacity:0;transform:translateY(-4px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.balance-chip .label{color:var(--text-3);text-transform:uppercase;letter-spacing:0.15em;font-size:0.85em}
+.balance-chip .value{color:var(--accent-hi);transition:color 0.3s ease}
+.balance-chip .value.flash{color:var(--good)}
+.topbar-right .auth-guest{display:inline-flex}
+.topbar-right .auth-user{display:none}
+.topbar.is-logged-in .topbar-right .auth-guest{display:none}
+.topbar.is-logged-in .topbar-right .auth-user{display:inline-flex}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:32px}
+.stat-box{background:#1b1d24;border:1px solid #262932;border-radius:10px;padding:20px 24px;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color 0.2s,background 0.2s}
+.stat-box:hover{border-color:#323641;background:#22242d}
+.stat-label{font-size:12px;color:#7c8091;text-transform:uppercase;letter-spacing:0.22em}
+.stat-value{color:#f4f5f8;font-variant-numeric:tabular-nums;line-height:1;font-size:clamp(26px,2.4vw,44px);margin-top:auto;padding-top:0.4em}
+.stat-value.accent{color:#ffffff}
+.section{margin-bottom:36px}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:16px}
+.section-title{font-size:22px;color:#f4f5f8;font-weight:normal}
+.section-count{font-size:12px;color:#7c8091;text-transform:uppercase;letter-spacing:0.22em;font-variant-numeric:tabular-nums}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:0.55em;background:#8ea3ff;border:1px solid #8ea3ff;color:#0e0f13;font-family:inherit;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;padding:12px 20px;border-radius:8px;cursor:pointer;transition:background 0.2s,border-color 0.2s}
+.cta:hover{background:#ffffff;border-color:#ffffff}
+.cta.ghost{background:#22242d;border-color:#323641;color:#f4f5f8;font-weight:normal}
+.cta.ghost:hover{background:#2a2d38;border-color:#8ea3ff;color:#ffffff}
+.cta:disabled{opacity:0.55;cursor:not-allowed}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.plan-card{background:#1b1d24;border:1px solid #262932;border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px;transition:border-color 0.2s,background 0.2s}
+.plan-card:hover{border-color:#323641;background:#22242d}
+.plan-name{font-size:24px;color:#f4f5f8;font-weight:normal}
+.plan-price{font-size:36px;color:#ffffff;font-variant-numeric:tabular-nums;line-height:1}
+.plan-price .per{font-size:14px;color:#7c8091;margin-left:0.35em;font-weight:normal}
+.plan-desc{font-size:13px;color:#7c8091;line-height:1.5;min-height:2.4em}
+.plan-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #262932;border-bottom:1px solid #262932;padding:12px 0}
+.plan-meta .label{font-size:11px;color:#7c8091;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:0.35em}
+.plan-meta .value{font-size:18px;color:#f4f5f8;font-variant-numeric:tabular-nums}
+.plan-actions{display:flex;gap:10px}
+.plan-actions .cta{flex:1 1 auto}
+.table-wrap{background:#1b1d24;border:1px solid #262932;border-radius:10px;overflow-x:auto}
+table.recent{width:100%;border-collapse:collapse;font-size:13px}
+table.recent thead th{text-align:left;padding:14px 20px;font-weight:normal;color:#7c8091;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;background:#22242d;border-bottom:1px solid #262932;white-space:nowrap}
+table.recent thead th.right{text-align:right}
+table.recent tbody tr{border-bottom:1px solid #262932;transition:background 0.15s}
+table.recent tbody tr:last-child{border-bottom:none}
+table.recent tbody tr:hover{background:#22242d}
+table.recent tbody tr.is-active{background:rgba(142,163,255,0.06)}
+table.recent td{padding:12px 20px;color:#b9bcc8;vertical-align:middle}
+table.recent td.name{color:#f4f5f8}
+table.recent td.num{color:#f4f5f8;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+table.recent td.date{color:#7c8091;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:56px 24px;text-align:center;color:#7c8091;font-size:12px;text-transform:uppercase;letter-spacing:0.15em}
+.empty .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.status-pill{display:inline-flex;align-items:center;gap:0.4em;border-radius:4px;padding:0.3em 0.85em;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;white-space:nowrap}
+.status-pill.active{background:rgba(142,163,255,0.14);color:#8ea3ff;border:1px solid rgba(142,163,255,0.3)}
+.status-pill.settled{background:rgba(110,231,168,0.12);color:#6ee7a8;border:1px solid rgba(110,231,168,0.25)}
+.status-pill.expired{background:rgba(124,128,145,0.12);color:#7c8091;border:1px solid rgba(124,128,145,0.25)}
+.notification-container{position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.notification{background:rgba(18,22,28,0.95);border-radius:14px;padding:14px 24px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);display:flex;align-items:center;gap:14px;min-width:320px;max-width:500px;pointer-events:auto;transform:translateY(-120%);opacity:0;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s}
+.notification.show{transform:translateY(0);opacity:1}
+.notification.fade-out{transform:translateY(-20px) scale(0.95);opacity:0;pointer-events:none}
+.notification-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notification-icon i{font-size:19px}
+.notification.success .notification-icon{background:rgba(39,201,63,0.15);color:#27c93f}
+.notification.error .notification-icon{background:rgba(255,95,86,0.15);color:#ff5f56}
+.notification.warning .notification-icon{background:rgba(255,189,46,0.15);color:#ffbd2e}
+.notification.info .notification-icon{background:rgba(176,206,255,0.15);color:#b0ceff}
+.notification-content{flex:1}
+.notification-title{font-size:14px;font-weight:600;color:white;margin-bottom:2px}
+.notification-message{font-size:12px;color:#b9bcc8;line-height:1.4}
+.notification-close{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;color:#7c8091;flex-shrink:0}
+.notification-close:hover{background:rgba(255,255,255,0.08);color:white}
+#pageLoader{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#14161d}
+#pageLoader::after{content:"";width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);border-top-color:#8ea3ff;animation:pageSpin 0.8s linear infinite}
+@keyframes pageSpin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="pageLoader" aria-hidden="true"></div>
+<script>
+(function(){var l=document.getElementById("pageLoader"),p=0,f=window.fetch,gone=0;window.fetch=function(){p++;var r=f.apply(this,arguments);var d=function(){p--};r.then(d,d);return r};function done(){if(!gone){gone=1;l.remove()}}function check(){p>0?setTimeout(check,100):done()}Promise.all([document.fonts?document.fonts.ready:0,new Promise(function(r){document.readyState==="complete"?r():addEventListener("load",r)})]).then(function(){setTimeout(check,250)});setTimeout(done,8000)})();
+</script>
+
+<div class="notification-container" id="notificationContainer"></div>
+
+<div class="container">
+    <div class="topbar" id="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-center">
+            <a class="nav-btn" href="."><i class="ph-bold ph-house"></i> Home</a>
+            <a class="nav-btn" href="topup"><i class="ph-bold ph-wallet"></i> Top Up</a>
+            <a class="nav-btn" href="solves"><i class="ph-bold ph-puzzle-piece"></i> Solves</a>
+            <a class="nav-btn is-active" href="subscriptions"><i class="ph-bold ph-crown"></i> Subscriptions</a>
+            <a class="nav-btn" href="preferences"><i class="ph-bold ph-sliders"></i> Preferences</a>
+            <a class="nav-btn" href="docs"><i class="ph-bold ph-book-open"></i> Docs</a>
+            <a class="nav-btn" href="extension"><i class="ph-bold ph-puzzle-piece"></i> Extension</a>
+        </div>
+        <div class="topbar-right">
+            <div class="balance-chip" id="balance-chip">
+                <span class="label">Balance</span>
+                <span class="value" id="balance-value">€0.00</span>
+            </div>
+            <a class="nav-btn auth auth-guest" href="login" id="nav-login">Login</a>
+            <a class="nav-btn auth primary auth-guest" href="register" id="nav-register">Register</a>
+            <button class="nav-btn auth logout auth-user" id="nav-logout" type="button"><i class="ph-bold ph-sign-out"></i> Logout</button>
+        </div>
+    </div>
+
+    <h1 class="brand">Sub<span class="accent">scriptions</span></h1>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-label">Active plan</div>
+            <div class="stat-value accent" id="st-active">-</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Solves left today</div>
+            <div class="stat-value" id="st-solves">-</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Time remaining</div>
+            <div class="stat-value" id="st-time">-</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Available plans</h2>
+            <div class="section-count" id="plans-count">-</div>
+        </div>
+        <div class="plan-grid" id="plans"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">My subscriptions</h2>
+            <div class="section-count" id="mine-count">-</div>
+        </div>
+        <div class="table-wrap" id="mine"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Purchase history</h2>
+            <div class="section-count" id="history-count">-</div>
+        </div>
+        <div class="table-wrap" id="history"></div>
+    </div>
+</div>
+
+<script>
+window.APP={VpsUrl:"",VpsResolver:"https://imgekkefries.pythonanywhere.com/vps",storageKey:"GekkeSolutionsKey"};
+window.ready=(async()=>{try{const r=await fetch(window.APP.VpsResolver,{cache:"no-store"});const u=(await r.text()).trim();if(u)window.APP.VpsUrl=u}catch(e){console.error("VPS resolve failed",e)}})();
+window.$=(s,r=document)=>r.querySelector(s);
+window.$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+window.getKey=()=>localStorage.getItem(window.APP.storageKey);
+window.setKey=k=>localStorage.setItem(window.APP.storageKey,k);
+window.clearKey=()=>localStorage.removeItem(window.APP.storageKey);
+window.api=p=>window.APP.VpsUrl.replace(/\/$/,"")+p;
+window.esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+window.postJSON=async(path,body)=>{if(window.ready){try{await window.ready}catch(e){}}const r=await fetch(api(path),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});return r.json()};
+window.getJSON=async(path)=>{if(window.ready){try{await window.ready}catch(e){}}const r=await fetch(api(path));return r.json()};
+</script>
+
+<script>
+(function(){"use strict";var c=document.getElementById("notificationContainer"),id=0,active=[];
+function rm(n,skip){var idx=active.findIndex(x=>x.el===n);if(idx!==-1){if(active[idx].t)clearTimeout(active[idx].t);active.splice(idx,1)}if(skip){n.remove();return}n.classList.remove("show");n.classList.add("fade-out");setTimeout(()=>n.remove(),250)}
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML}
+window.showNotification=function(type,title,msg,dur){dur=dur===undefined?4000:dur;var i=++id,n=document.createElement("div");n.className="notification "+type;n.dataset.id=i;var ic="info-circle";if(type==="success")ic="check-circle";else if(type==="error")ic="times-circle";else if(type==="warning")ic="exclamation-triangle";n.innerHTML='<div class="notification-icon"><i class="fas fa-'+ic+'"></i></div><div class="notification-content"><div class="notification-title">'+esc(title)+'</div><div class="notification-message">'+esc(msg)+'</div></div><button class="notification-close"><i class="fas fa-times"></i></button>';c.appendChild(n);n.querySelector(".notification-close").addEventListener("click",function(e){e.stopPropagation();rm(n)});requestAnimationFrame(function(){requestAnimationFrame(function(){n.classList.add("show")})});var t=null;if(dur>0)t=setTimeout(function(){rm(n)},dur);active.push({el:n,t:t});if(active.length>15)active=active.slice(-15);return i};
+window.notify={success:(t,m,d)=>window.showNotification("success",t,m,d),error:(t,m,d)=>window.showNotification("error",t,m,d),warning:(t,m,d)=>window.showNotification("warning",t,m,d),info:(t,m,d)=>window.showNotification("info",t,m,d)};
+})();
+</script>
+
+<script>
+(function(){"use strict";var REFRESH=5000,lastBal=null,lastState;
+function setIn(v){var t=document.getElementById("topbar");if(t)t.classList.toggle("is-logged-in",v)}
+function fmt(n){return String(Number(n)||0)}
+async function refresh(){
+  var k=getKey(),chip=document.getElementById("balance-chip"),val=document.getElementById("balance-value");
+  if(!chip||!val)return;
+  if(!k){if(lastState!=="out"){chip.classList.remove("is-visible");setIn(false);lastState="out";lastBal=null}return}
+  try{var d=await postJSON("/solutions/login",{key:k});
+    if(d.code===200){var b=Number(d.balance)||0;
+      if(lastState!=="in"){val.textContent="€"+fmt(b);chip.classList.add("is-visible");setIn(true);lastState="in";lastBal=b}
+      else if(b!==lastBal){val.textContent="€"+fmt(b);lastBal=b;val.classList.add("flash");setTimeout(function(){val.classList.remove("flash")},700)}
+    }else if(d.code===401){if(lastState!=="out"){clearKey();chip.classList.remove("is-visible");setIn(false);lastState="out";lastBal=null}}
+  }catch(e){}
+}
+window.refreshTopbarBalance=refresh;refresh();setInterval(refresh,REFRESH);
+var lo=document.getElementById("nav-logout");if(lo)lo.addEventListener("click",function(){clearKey();document.getElementById("topbar").classList.remove("is-logged-in");document.getElementById("balance-chip").classList.remove("is-visible");notify.success("Logged out","Your API key was removed from this browser.");window.onLoggedOut&&window.onLoggedOut()});
+})();
+</script>
+
+<script>
+(function(){"use strict";
+var plansEl=document.getElementById("plans"),plansCountEl=document.getElementById("plans-count");
+var mineEl=document.getElementById("mine"),mineCountEl=document.getElementById("mine-count");
+var histEl=document.getElementById("history"),histCountEl=document.getElementById("history-count");
+var stActive=document.getElementById("st-active"),stSolves=document.getElementById("st-solves"),stTime=document.getElementById("st-time");
+var catalogue=null,mineCache=[];
+
+function fmtMoney(n){return "€"+(Number(n)||0).toFixed(2)}
+function fmtDate(u){if(!u)return "-";var d=new Date(u*1000),p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()+" "+p(d.getHours())+":"+p(d.getMinutes())}
+function fmtDuration(sec){sec=Math.max(0,Math.floor(Number(sec)||0));var d=Math.floor(sec/86400),h=Math.floor(sec%86400/3600),m=Math.floor(sec%3600/60),s=sec%60;if(d>0)return d+"d "+h+"h";if(h>0)return h+"h "+m+"m";if(m>0)return m+"m "+s+"s";return s+"s"}
+function fmtDays(d){d=Number(d)||0;return d+(d===1?" day":" days")}
+
+function renderPlans(){
+  if(!catalogue){plansEl.innerHTML='<div class="empty">Catalogue unavailable</div>';return}
+  var keys=Object.keys(catalogue);
+  plansCountEl.textContent=keys.length+" plan"+(keys.length===1?"":"s");
+  if(!keys.length){plansEl.innerHTML='<div class="empty">No plans available</div>';return}
+  plansEl.innerHTML=keys.map(function(name){
+    var p=catalogue[name]||{};
+    return '<div class="plan-card">'+
+      '<div class="plan-name">'+esc(name)+'</div>'+
+      '<div class="plan-price">'+fmtMoney(p.price)+'<span class="per">/ one-time</span></div>'+
+      '<div class="plan-desc">'+esc(p.description||"")+'</div>'+
+      '<div class="plan-meta">'+
+        '<div><div class="label">Duration</div><div class="value">'+fmtDays(p.days)+'</div></div>'+
+        '<div><div class="label">Solves / day</div><div class="value">'+(Number(p.solves_per_day)||0)+'</div></div>'+
+      '</div>'+
+      '<div class="plan-actions"><button class="cta" data-buy="'+esc(name)+'">Purchase</button></div>'+
+    '</div>'
+  }).join("");
+  plansEl.querySelectorAll("[data-buy]").forEach(function(btn){btn.addEventListener("click",function(){purchase(btn.dataset.buy,btn)})});
+}
+
+async function loadPlans(){
+  try{var d=await getJSON("/solutions/subscriptions");if(d.code===200){catalogue=d.subscriptions||{};renderPlans();return}}catch(e){}
+  renderPlans();
+}
+
+function setStats(active){
+  if(active){stActive.textContent=active.name||"-";stSolves.textContent=(active.solves_left||0)+"/"+(active.total_solves||0);stTime.textContent=fmtDuration(active.time_left||0);}
+  else{stActive.textContent="None";stSolves.textContent="-";stTime.textContent="-";}
+}
+
+function renderMine(subs,active){
+  mineCache=subs||[];
+  mineCountEl.textContent=mineCache.length+" subscription"+(mineCache.length===1?"":"s");
+  if(!mineCache.length){mineEl.innerHTML='<div class="empty">No subscriptions yet. Pick a plan above to get started.</div>';return}
+  var rows=mineCache.map(function(s){
+    var isAct=active&&active.id===s.id;
+    var pill=isAct?'<span class="status-pill active">Active</span>':'<span class="status-pill expired">Idle</span>';
+    return '<tr class="'+(isAct?"is-active":"")+'">'+
+      '<td class="name">'+esc(s.name)+'</td>'+
+      '<td>'+pill+'</td>'+
+      '<td class="num">'+(s.solves_left||0)+" / "+(s.total_solves||0)+'</td>'+
+      '<td class="num" data-time="'+s.id+'">'+fmtDuration(s.time_left||0)+'</td>'+
+      '<td class="date">'+fmtDate(s.purchased_at)+'</td>'+
+    '</tr>'
+  }).join("");
+  mineEl.innerHTML='<table class="recent"><thead><tr><th>Plan</th><th>Status</th><th class="right">Solves</th><th class="right">Time left</th><th class="right">Purchased</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderHistory(items){
+  histCountEl.textContent=(items||[]).length+" purchase"+((items||[]).length===1?"":"s");
+  if(!items||!items.length){histEl.innerHTML='<div class="empty">No purchases yet.</div>';return}
+  var rows=items.map(function(p){
+    return '<tr>'+
+      '<td class="name">'+esc(p.subscription||p.name||"-")+'</td>'+
+      '<td class="num">'+fmtMoney(p.price)+'</td>'+
+      '<td class="num">'+(Number(p.solves_per_day)||0)+'</td>'+
+      '<td class="num">'+fmtDays(p.days)+'</td>'+
+      '<td class="date">'+esc(p.purchased_at_cet||fmtDate(p.purchased_at))+'</td>'+
+    '</tr>'
+  }).join("");
+  histEl.innerHTML='<table class="recent"><thead><tr><th>Plan</th><th class="right">Price</th><th class="right">Solves/day</th><th class="right">Days</th><th class="right">Purchased (CET)</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderGuest(){
+  setStats(null);
+  mineCountEl.textContent="-";
+  mineEl.innerHTML='<div class="empty"><div>Log in or register to see your subscriptions.</div><div class="row"><a class="cta ghost" href="login">Login</a><a class="cta" href="register">Register</a></div></div>';
+  histCountEl.textContent="-";
+  histEl.innerHTML='<div class="empty"><div>Log in to view your purchase history.</div></div>';
+}
+
+async function loadMine(){
+  var k=getKey();if(!k){renderGuest();return}
+  try{var d=await postJSON("/solutions/subscriptions/mine",{key:k});
+    if(d.code===401){clearKey();renderGuest();return}
+    if(d.code===200){setStats(d.active||null);renderMine(d.subscriptions||[],d.active||null)}
+  }catch(e){}
+}
+
+async function loadHistory(){
+  var k=getKey();if(!k)return;
+  try{var d=await postJSON("/solutions/subscriptions/purchases",{key:k});
+    if(d.code===200)renderHistory(d.purchases||[])
+  }catch(e){}
+}
+
+async function purchase(plan,btn){
+  var k=getKey();
+  if(!k){notify.warning("Not logged in","Register or log in to purchase a subscription.");return}
+  var p=catalogue&&catalogue[plan];
+  if(!p){notify.error("Unknown plan","That plan no longer exists.");return}
+  btn.disabled=true;var prev=btn.textContent;btn.textContent="Purchasing...";
+  try{
+    var d=await postJSON("/solutions/subscriptions/purchase",{key:k,plan:plan});
+    if(d.code===201){notify.success("Purchased",plan+" is now in your subscriptions.");loadMine();loadHistory();window.refreshTopbarBalance&&window.refreshTopbarBalance()}
+    else if(d.code===402){notify.error("Not enough balance","Top up your balance first, then try again.")}
+    else if(d.code===401){clearKey();renderGuest();notify.error("Session expired","Please log in again.")}
+    else{notify.error("Purchase failed",d.error||("Code "+d.code))}
+  }catch(e){notify.error("Purchase failed",String(e))}
+  finally{btn.disabled=false;btn.textContent=prev}
+}
+
+// live countdown on displayed time cells
+setInterval(function(){
+  mineCache.forEach(function(s){s.time_left=Math.max(0,(s.time_left||0)-1)});
+  document.querySelectorAll("[data-time]").forEach(function(td){
+    var id=td.getAttribute("data-time"),s=mineCache.find(function(x){return x.id===id});
+    if(s)td.textContent=fmtDuration(s.time_left)
+  });
+  if(mineCache.length){var act=mineCache.find(function(s){return s.active});if(act)setStats(act)}
+},1000);
+
+window.onLoggedOut=function(){renderGuest()};
+
+loadPlans();
+loadMine();
+loadHistory();
+setInterval(function(){loadMine();loadHistory()},15000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+(function(){
+  var KNOWN=['solves','login','register','topup','preferences','docs','extension','subscriptions'];
+  var parts=location.pathname.split('/').filter(Boolean);
+  if(parts.length && parts[parts.length-1]==='index.html')parts.pop();
+  if(parts.length && KNOWN.indexOf(parts[parts.length-1])!==-1)parts.pop();
+  var root='/'+(parts.length?parts.join('/')+'/':'');
+  window.__appRoot=root;
+  var b=document.createElement('base');b.href=root;
+  document.head.insertBefore(b,document.head.firstChild);
+})();
+</script>
+<title>Gekke.org ~ Solutions</title>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+@font-face{font-family:"Terminal";src:url("https://imgekkefries.pythonanywhere.com/terminal.woff") format("woff");font-weight:normal;font-style:normal;font-display:swap}
+:root{
+--surface-0:#0e0f13;--surface-1:#15161c;--surface-2:#1b1d24;--surface-3:#22242d;--surface-4:#2a2d38;
+--line-1:#262932;--line-2:#323641;
+--text-1:#f4f5f8;--text-2:#b9bcc8;--text-3:#7c8091;--text-4:#50535e;
+--accent:#8ea3ff;--accent-hi:#ffffff;--good:#6ee7a8;--warn:#f5c76e;--bad:#ff7d7d;
+--page-max:1400px;--page-pad-x:clamp(16px,2.4vw,48px);--page-pad-y:clamp(24px,3vw,56px);
+--scale:1;--font-mono:"Terminal","SF Mono",Menlo,Consolas,monospace;
+--text-secondary:var(--text-2);--text-muted:var(--text-3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161d;color:var(--text-1);font-family:"Terminal","SF Mono",Menlo,Consolas,monospace;font-size:clamp(12px,0.5vw + 10px,17px);line-height:1.5;letter-spacing:0.01em;-webkit-font-smoothing:antialiased;padding:var(--page-pad-y) var(--page-pad-x);min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px}
+::selection{background:var(--accent);color:var(--surface-0)}
+html{scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}
+.container{max-width:var(--page-max);margin:0 auto;position:relative;z-index:1;width:100%}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:clamp(12px,2vw,32px);margin-bottom:clamp(28px,4vw,64px);padding-bottom:clamp(14px,1.6vw,22px);border-bottom:1px solid var(--line-1);animation:fadeDown 0.5s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.topbar-left{flex:1;display:flex;align-items:center;gap:clamp(6px,0.8vw,12px)}
+.topbar-center{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px)}
+.topbar-right{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,0.8vw,12px)}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--text-3);font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.12em;text-transform:uppercase;padding:clamp(8px,0.7vw,12px) clamp(14px,1.2vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;transition:color 0.2s ease,background 0.2s ease,border-color 0.2s ease;text-decoration:none;display:inline-flex;align-items:center;gap:0.5em;position:relative}
+.nav-btn i{font-size:1.3em;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.nav-btn:hover{color:var(--text-1);background:var(--surface-2)}
+.nav-btn.is-active{color:var(--text-1);background:var(--surface-3);border-color:var(--line-2)}
+.nav-btn.auth{background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-2)}
+.nav-btn.auth:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-1)}
+.nav-btn.auth.primary{background:var(--accent);border-color:var(--accent);color:var(--surface-0);font-weight:600}
+.nav-btn.auth.primary:hover{background:var(--accent-hi);border-color:var(--accent-hi)}
+.nav-btn.auth.logout{background:rgba(255,125,125,0.08);border-color:rgba(255,125,125,0.25);color:var(--bad)}
+.nav-btn.auth.logout:hover{background:rgba(255,125,125,0.14);border-color:rgba(255,125,125,0.4);color:var(--bad)}
+.balance-chip{display:none;align-items:center;gap:0.55em;background:var(--surface-2);border:1px solid var(--line-1);color:var(--text-1);padding:clamp(7px,0.65vw,11px) clamp(12px,1.1vw,20px);border-radius:clamp(6px,0.5vw,10px);font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.05em;font-variant-numeric:tabular-nums}
+.balance-chip.is-visible{display:inline-flex}
+.balance-chip .label{color:var(--text-3);text-transform:uppercase;letter-spacing:0.15em;font-size:0.85em}
+.balance-chip .value{color:var(--accent-hi)}
+.topbar-right .auth-guest{display:inline-flex}
+.topbar-right .auth-user{display:none}
+.topbar.is-logged-in .topbar-right .auth-guest{display:none}
+.topbar.is-logged-in .topbar-right .auth-user{display:inline-flex}
+
+.page-head{margin-bottom:clamp(24px,3vw,48px);animation:fadeUp 0.45s ease both}
+.page-title{font-size:clamp(28px,3vw + 12px,64px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;line-height:1.1}
+.page-title .accent{color:var(--text-3)}
+.page-sub{color:var(--text-3);margin-top:0.6em;font-size:clamp(12px,0.4vw + 9px,15px);letter-spacing:0.02em;max-width:70ch}
+
+.doc-card{background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(10px,1vw,18px);padding:clamp(20px,2.2vw,40px);margin-bottom:clamp(18px,2vw,28px);animation:fadeUp 0.55s ease both;box-shadow:0 1px 0 rgba(255,255,255,0.02) inset,0 24px 64px -32px rgba(0,0,0,0.9)}
+
+.doc-card.solve-doc{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:0.005em}
+.doc-card.solve-doc h2,.doc-card.solve-doc h3{font-family:inherit;letter-spacing:0}
+.doc-card.solve-doc p{font-family:inherit;letter-spacing:0}
+.doc-card.solve-doc code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace}
+.doc-card.solve-doc pre{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace}
+.doc-card.solve-doc .params-table,.doc-card.solve-doc .resp-item,.doc-card.solve-doc .resp-code,.doc-card.solve-doc .note{font-family:inherit}
+.doc-card.solve-doc .params-table td code,.doc-card.solve-doc .resp-item .fields code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace}
+.doc-card h2{font-size:clamp(16px,1vw + 9px,24px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.5em;display:flex;align-items:center;gap:0.55em}
+.doc-card h2 i{color:var(--text-3);font-size:1.05em}
+.doc-card h3{font-size:clamp(13px,0.5vw + 10px,17px);color:var(--text-1);font-weight:normal;letter-spacing:0.02em;margin:clamp(18px,1.8vw,28px) 0 0.6em}
+.doc-card p{color:var(--text-2);font-size:clamp(12px,0.4vw + 9px,15px);line-height:1.7;letter-spacing:0.01em;margin-bottom:0.8em;max-width:80ch}
+.doc-card p:last-child{margin-bottom:0}
+.doc-card code{background:var(--surface-1);color:var(--text-1);padding:0.12em 0.45em;border-radius:4px;font-size:0.92em;letter-spacing:0}
+
+.endpoint-line{display:flex;align-items:center;gap:0.7em;flex-wrap:wrap;margin-bottom:0.9em}
+.method{display:inline-flex;align-items:center;background:var(--text-1);color:var(--surface-0);font-size:clamp(10px,0.3vw + 8px,12px);letter-spacing:0.12em;text-transform:uppercase;font-weight:600;padding:0.35em 0.9em;border-radius:4px}
+.path-code{background:var(--surface-1);color:var(--accent-hi);padding:0.35em 0.9em;border-radius:4px;font-size:clamp(12px,0.4vw + 9px,15px);letter-spacing:0.02em}
+
+pre{background:var(--surface-1);border:1px solid var(--line-1);border-radius:clamp(8px,0.6vw,12px);padding:clamp(14px,1.4vw,22px) clamp(16px,1.6vw,26px);overflow-x:auto;font-family:var(--font-mono);font-size:clamp(11px,0.35vw + 8px,14px);line-height:1.65;color:var(--text-2);letter-spacing:0.01em;margin-bottom:0.9em}
+pre .k{color:var(--accent-hi)}
+pre .s{color:var(--good)}
+pre .c{color:var(--text-4)}
+pre .n{color:var(--warn)}
+
+.resp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(260px,26vw,360px),1fr));gap:clamp(10px,1vw,16px);margin-top:0.6em}
+.resp-item{background:var(--surface-1);border:1px solid var(--line-1);border-radius:clamp(8px,0.6vw,12px);padding:clamp(14px,1.3vw,20px) clamp(16px,1.5vw,24px)}
+.resp-code{display:inline-flex;align-items:center;gap:0.5em;font-size:clamp(12px,0.4vw + 9px,15px);color:var(--text-1);letter-spacing:0.02em;margin-bottom:0.5em}
+.resp-code .num{font-variant-numeric:tabular-nums;background:var(--surface-3);padding:0.15em 0.6em;border-radius:4px;font-weight:600}
+.resp-code.ok .num{background:var(--text-1);color:var(--surface-0)}
+.resp-item p{margin-bottom:0.35em;color:var(--text-3);font-size:clamp(11px,0.35vw + 8px,14px)}
+.resp-item .fields{color:var(--text-2);font-size:clamp(11px,0.35vw + 8px,14px);line-height:1.6}
+.resp-item .fields code{background:var(--surface-3)}
+
+.note{display:flex;align-items:flex-start;gap:0.7em;background:var(--surface-3);border-radius:clamp(8px,0.6vw,12px);padding:clamp(12px,1.1vw,16px) clamp(14px,1.2vw,18px);font-size:clamp(11px,0.35vw + 8px,13px);color:var(--text-2);line-height:1.6;margin:0.9em 0}
+.note i{font-size:1.2em;flex-shrink:0;margin-top:0.05em;color:var(--text-3)}
+
+.params-table{width:100%;border-collapse:collapse;font-size:clamp(11px,0.35vw + 9px,14px);margin-top:0.4em}
+.params-table thead th{text-align:left;padding:clamp(10px,0.9vw,14px) clamp(12px,1.2vw,18px);font-weight:normal;color:var(--text-3);font-size:clamp(10px,0.3vw + 8px,12px);letter-spacing:0.1em;text-transform:uppercase;background:var(--surface-3);white-space:nowrap}
+.params-table tbody tr{border-bottom:1px solid var(--line-1)}
+.params-table tbody tr:last-child{border-bottom:none}
+.params-table td{padding:clamp(10px,0.9vw,14px) clamp(12px,1.2vw,18px);color:var(--text-2);vertical-align:top;line-height:1.5}
+.params-table td:first-child{color:var(--text-1);white-space:nowrap}
+.params-table td code{background:var(--surface-3);font-size:0.9em}
+.req{color:var(--text-1);font-size:0.9em;letter-spacing:0.06em;text-transform:uppercase}
+
+.cfg-panel{background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(10px,1vw,18px);padding:clamp(16px,1.6vw,26px) clamp(18px,1.8vw,30px);margin-bottom:clamp(18px,2vw,28px);animation:fadeUp 0.5s ease both;box-shadow:0 1px 0 rgba(255,255,255,0.02) inset,0 24px 64px -32px rgba(0,0,0,0.9)}
+.cfg-row{display:flex;align-items:center;gap:clamp(12px,1.4vw,22px);flex-wrap:wrap}
+.cfg-row + .cfg-row{margin-top:clamp(12px,1.2vw,18px);padding-top:clamp(12px,1.2vw,18px);border-top:1px solid var(--line-1)}
+.cfg-label{flex:0 0 auto;min-width:clamp(90px,9vw,130px);color:var(--text-3);font-size:clamp(11px,0.35vw + 8px,14px);letter-spacing:0.08em;text-transform:uppercase}
+.cfg-input-wrap{position:relative;flex:1 1 auto;display:flex;align-items:center;min-width:0}
+.cfg-input{width:100%;background:var(--surface-1);border:1px solid var(--line-1);border-radius:clamp(8px,0.6vw,12px);color:var(--text-1);font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:clamp(11px,0.35vw + 9px,14px);letter-spacing:0.02em;padding:clamp(10px,0.9vw,14px) clamp(14px,1.2vw,18px);transition:border-color 0.2s ease,filter 0.25s ease;outline:none}
+.cfg-input:focus{border-color:var(--line-2)}
+.cfg-input[readonly]{cursor:default;color:var(--text-2);user-select:text}
+.cfg-input[readonly]:focus,.cfg-input[readonly]:focus-visible{outline:none;border-color:var(--line-1)}
+.cfg-input.is-blurred{filter:blur(5px);user-select:none}
+.cfg-input.is-blurred:hover,.cfg-input.is-blurred:focus{filter:blur(0)}
+.cfg-keyview{cursor:default;display:flex;align-items:center}
+.cfg-keyview .key-text{filter:blur(5px);user-select:none;transition:filter 0.25s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cfg-keyview .key-text:hover{filter:blur(0);user-select:text}
+.cfg-copy{position:absolute;right:clamp(6px,0.5vw,10px);top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:clamp(28px,2.2vw,34px);height:clamp(28px,2.2vw,34px);background:transparent;border:none;border-radius:0;color:var(--text-3);cursor:pointer;transition:color 0.18s ease;-webkit-tap-highlight-color:transparent}
+.cfg-copy i{font-size:clamp(15px,1.1vw,19px);line-height:1;display:inline-block;transition:color 0.18s ease,opacity 0.18s ease}
+.cfg-copy:hover{color:var(--text-1)}
+.cfg-copy.is-copied{color:var(--text-1)}
+.cfg-copy.is-copied i{animation:cfgFade 0.22s ease both}
+@keyframes cfgFade{from{opacity:0}to{opacity:1}}
+.cfg-input.has-copy{padding-right:clamp(46px,3.6vw,58px)}
+.cfg-hint{flex:1 1 100%;color:var(--text-3);font-size:clamp(10px,0.3vw + 8px,12px);letter-spacing:0.02em;margin-top:0.5em}
+
+pre .key-blur{filter:blur(4px);transition:filter 0.25s ease;cursor:default}
+pre .key-blur:hover{filter:blur(0)}
+
+#pageLoader{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#14161d}
+#pageLoader::after{content:"";width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--accent);animation:pageSpin 0.8s linear infinite}
+@keyframes pageSpin{to{transform:rotate(360deg)}}
+
+#scrollIndicator{position:fixed;right:clamp(10px,1.2vw,22px);top:50%;transform:translateY(-50%);z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:clamp(6px,0.7vw,10px);pointer-events:none;opacity:0;transition:opacity 0.4s ease}
+#scrollIndicator.is-visible{opacity:1}
+.si-tick{width:clamp(14px,1.1vw,20px);height:1px;background:var(--text-2);opacity:0.28;transform:scaleX(0.72);transform-origin:right center;transition:opacity 0.5s ease,transform 0.5s ease;will-change:opacity,transform}
+
+.logout-backdrop{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:var(--page-pad-y) var(--page-pad-x);background:rgba(8,9,12,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity 0.28s ease}
+.logout-backdrop.is-open{opacity:1;pointer-events:auto}
+.logout-modal{width:100%;max-width:520px;background:var(--surface-2);border:1px solid var(--line-1);border-radius:clamp(12px,1.2vw,22px);padding:clamp(28px,3vw,48px) clamp(26px,2.8vw,44px);box-shadow:0 1px 0 rgba(255,255,255,0.03) inset,0 40px 100px -40px rgba(0,0,0,0.95);transform:scale(0.94) translateY(12px);opacity:0;transition:transform 0.42s cubic-bezier(0.22,1,0.36,1),opacity 0.28s ease;text-align:center}
+.logout-backdrop.is-open .logout-modal{transform:scale(1) translateY(0);opacity:1}
+.logout-icon{display:inline-flex;align-items:center;justify-content:center;color:var(--bad);margin-bottom:clamp(14px,1.4vw,22px)}
+.logout-icon i{font-size:clamp(40px,3.4vw,60px);line-height:1}
+.logout-title{font-size:clamp(20px,1.4vw + 10px,30px);color:var(--text-1);font-weight:normal;letter-spacing:0.01em;margin-bottom:0.5em}
+.logout-body{font-size:clamp(12px,0.4vw + 9px,15px);color:var(--text-2);line-height:1.6;margin-bottom:clamp(18px,1.8vw,26px)}
+.logout-body strong{color:var(--text-1);font-weight:normal}
+.logout-warning{display:flex;align-items:flex-start;gap:0.7em;background:rgba(245,199,110,0.08);border:1px solid rgba(245,199,110,0.22);border-radius:clamp(8px,0.6vw,12px);padding:clamp(12px,1.1vw,16px) clamp(14px,1.2vw,18px);margin-bottom:clamp(16px,1.6vw,22px);font-size:clamp(11px,0.35vw + 8px,13px);color:var(--warn);line-height:1.5;text-align:left}
+.logout-warning i{font-size:1.2em;flex-shrink:0;margin-top:0.05em}
+.logout-warning span{color:var(--text-2)}
+.logout-key-preview{background:var(--surface-1);border:1px solid var(--line-1);border-radius:clamp(8px,0.6vw,12px);padding:clamp(12px,1.1vw,16px) clamp(14px,1.2vw,18px);font-size:clamp(12px,0.5vw + 9px,15px);color:var(--accent);letter-spacing:0.04em;word-break:break-all;line-height:1.4;margin-bottom:clamp(16px,1.6vw,22px);user-select:all;text-align:left}
+.logout-download{width:100%;margin-bottom:clamp(16px,1.6vw,22px)}
+.logout-download .btn{width:100%}
+.logout-actions{display:flex;gap:clamp(8px,0.8vw,12px);flex-wrap:wrap}
+.btn{flex:1 1 auto;min-width:150px;font-family:inherit;font-size:clamp(11px,0.4vw + 8px,14px);letter-spacing:0.14em;text-transform:uppercase;padding:clamp(12px,1vw,16px) clamp(16px,1.4vw,22px);border-radius:clamp(6px,0.5vw,10px);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:0.6em;transition:background 0.2s ease,border-color 0.2s ease,color 0.2s ease,opacity 0.2s ease;text-decoration:none;border:1px solid var(--line-2);background:var(--surface-3);color:var(--text-1)}
+.btn:hover:not(:disabled){background:var(--surface-4);border-color:var(--accent);color:var(--accent-hi)}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.btn.danger{background:rgba(255,125,125,0.12);border-color:rgba(255,125,125,0.3);color:var(--bad)}
+.btn.danger:hover:not(:disabled){background:rgba(255,125,125,0.2);border-color:rgba(255,125,125,0.5);color:var(--bad)}
+.btn.danger.is-locked,.btn.danger.is-locked:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-3);cursor:not-allowed}
+.btn .cooldown-num{font-variant-numeric:tabular-nums;display:inline-block;min-width:1.1em;text-align:center}
+
+.notification-container{position:fixed;top:calc(50px * var(--scale));left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;align-items:center;gap:calc(8px * var(--scale));pointer-events:none}
+.notification{background:rgba(18,22,28,0.95);backdrop-filter:blur(calc(20px * var(--scale)));border-radius:calc(14px * var(--scale));padding:calc(14px * var(--scale)) calc(24px * var(--scale));border:calc(1px * var(--scale)) solid rgba(255,255,255,0.1);box-shadow:0 calc(8px * var(--scale)) calc(32px * var(--scale)) rgba(0,0,0,0.4),0 0 0 calc(1px * var(--scale)) rgba(255,255,255,0.05) inset;display:flex;align-items:center;gap:calc(14px * var(--scale));min-width:calc(320px * var(--scale));max-width:calc(500px * var(--scale));pointer-events:auto;transform:translateY(-120%);opacity:0;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease,margin 0.3s ease;font-family:var(--font-mono);will-change:transform,opacity}
+.notification.show{transform:translateY(0);opacity:1}
+.notification.fade-out{transform:translateY(calc(-20px * var(--scale))) scale(0.95);opacity:0;pointer-events:none;transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),opacity 0.2s ease}
+.notification-icon{width:calc(32px * var(--scale));height:calc(32px * var(--scale));border-radius:calc(10px * var(--scale));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notification-icon i{font-size:calc(19px * var(--scale))}
+.notification.success .notification-icon{background:rgba(39,201,63,0.15);color:#27c93f}
+.notification.error .notification-icon{background:rgba(255,95,86,0.15);color:#ff5f56}
+.notification.warning .notification-icon{background:rgba(255,189,46,0.15);color:#ffbd2e}
+.notification.info .notification-icon{background:rgba(176,206,255,0.15);color:#b0ceff}
+.notification-content{flex:1}
+.notification-title{font-size:calc(14px * var(--scale));font-weight:600;color:white;margin-bottom:calc(2px * var(--scale));letter-spacing:calc(-0.2px * var(--scale))}
+.notification-message{font-size:calc(12px * var(--scale));color:var(--text-secondary);line-height:1.4}
+.notification-close{width:calc(28px * var(--scale));height:calc(28px * var(--scale));border-radius:calc(8px * var(--scale));display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;color:var(--text-muted);transition:all 0.15s ease;flex-shrink:0}
+.notification-close:hover{background:rgba(255,255,255,0.08);color:white}
+.notification-close i{font-size:calc(14px * var(--scale))}
+@media (max-width:550px){.notification{min-width:280px;padding:12px 18px}.notification-container{top:40px;width:90%}}
+
+@media (max-width:760px){
+.topbar{flex-wrap:wrap;row-gap:12px}
+.topbar-left{display:none}
+.topbar-right{order:1;flex:1 1 100%;justify-content:space-between}
+.topbar-center{order:2;flex:1 1 100%}
+.topbar-center .nav-btn{flex:1;justify-content:center;padding-left:8px;padding-right:8px}
+#scrollIndicator{display:none}
+}
+</style>
+</head>
+<body>
+<div id="pageLoader" aria-hidden="true"></div>
+<div id="scrollIndicator" aria-hidden="true"></div>
+<script>
+(function(){var l=document.getElementById("pageLoader"),p=0,f=window.fetch,gone=0;
+window.fetch=function(){p++;var r=f.apply(this,arguments);var d=function(){p--};r.then(d,d);return r};
+function done(){if(!gone){gone=1;l.remove()}}
+function check(){p>0?setTimeout(check,100):done()}
+Promise.all([document.fonts?document.fonts.ready:0,new Promise(function(r){document.readyState==="complete"?r():addEventListener("load",r)})]).then(function(){setTimeout(check,250)});
+setTimeout(done,8000)})();
+</script>
+
+<div class="notification-container" id="notificationContainer"></div>
+
+<div class="container">
+    <div class="topbar" id="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-center">
+            <a class="nav-btn" href="."><i class="ph-bold ph-house"></i> Home</a>
+            <a class="nav-btn" href="topup"><i class="ph-bold ph-wallet"></i> Top Up</a>
+            <a class="nav-btn" href="solves"><i class="ph-bold ph-puzzle-piece"></i> Solves</a>
+            <a class="nav-btn" href="subscriptions"><i class="ph-bold ph-crown"></i> Subscriptions</a>
+            <a class="nav-btn" href="preferences"><i class="ph-bold ph-sliders"></i> Preferences</a>
+            <a class="nav-btn is-active" href="docs"><i class="ph-bold ph-book-open"></i> Docs</a>
+            <a class="nav-btn" href="extension"><i class="ph-bold ph-puzzle-piece"></i> Extension</a>
+        </div>
+        <div class="topbar-right">
+            <div class="balance-chip" id="balance-chip">
+                <span class="label">Balance</span>
+                <span class="value" id="balance-value">€0.00</span>
+            </div>
+            <a class="nav-btn auth auth-guest" href="login" id="nav-login">Login</a>
+            <a class="nav-btn auth primary auth-guest" href="register" id="nav-register">Register</a>
+            <button class="nav-btn auth logout auth-user" id="nav-logout" type="button">
+                <i class="ph-bold ph-sign-out"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="page-head">
+        <h1 class="page-title">Docs<span class="accent">.</span></h1>
+        <p class="page-sub">Integrate Gekke Solutions into your own bots and tools - hand off the CAPTCHA and let the solvers do the work while you focus on the rest of your flow.</p>
+    </div>
+
+    <div class="cfg-panel">
+        <div class="cfg-row">
+            <span class="cfg-label">Base URL</span>
+            <div class="cfg-input-wrap">
+                <input class="cfg-input has-copy" id="cfg-baseurl" type="text" spellcheck="false" autocomplete="off" readonly />
+                <button class="cfg-copy" id="cfg-baseurl-copy" type="button" title="Copy base URL" aria-label="Copy base URL">
+                    <i class="ph-bold ph-copy"></i>
+                </button>
+            </div>
+        </div>
+        <div class="cfg-row">
+            <span class="cfg-label">API Key</span>
+            <div class="cfg-input-wrap">
+                <div class="cfg-input cfg-keyview has-copy" id="cfg-apikey" title="Hover the key to reveal it">
+                    <span class="key-text" id="cfg-apikey-text">YourApiKeyHere...</span>
+                </div>
+                <button class="cfg-copy" id="cfg-copy" type="button" title="Copy API key" aria-label="Copy API key">
+                    <i class="ph-bold ph-copy"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="doc-card solve-doc">
+        <h2><i class="ph-bold ph-key"></i> Check key &amp; balance</h2>
+        <div class="endpoint-line">
+            <span class="method">POST</span>
+            <span class="path-code">/solutions/login</span>
+        </div>
+        <p>
+            Validates your API key and returns the current account balance. Use it to confirm a
+            key is still valid or to display how much credit is left before you start solving.
+        </p>
+
+        <h3>How to make a request</h3>
+        <p>Send a JSON body containing only your API key.</p>
+        <pre><span class="c">POST</span> <span id="out-url2">http://localhost:5000</span>/solutions/login
+<span class="c">Content-Type:</span> application/json
+
+{
+  <span class="k">"key"</span>: <span class="s">"<span class="key-blur" id="out-key2">YourApiKeyHere...</span>"</span>
+}</pre>
+
+        <h3>Request fields</h3>
+        <table class="params-table">
+            <thead>
+                <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>key</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Your account API key (45 characters).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Successful response</h3>
+        <pre><span class="c">// HTTP 200</span>
+{
+  <span class="k">"code"</span>:    <span class="n">200</span>,
+  <span class="k">"balance"</span>: <span class="n">4.95</span>       <span class="c">// current balance in EUR</span>
+}</pre>
+        <p>If the account has an active timeout, an extra <code>countdown</code> field is included.</p>
+
+        <h3>Responses you can expect</h3>
+        <div class="resp-grid">
+            <div class="resp-item">
+                <div class="resp-code ok"><span class="num">200</span> OK</div>
+                <p>The key is valid.</p>
+                <div class="fields">Fields: <code>balance</code>, optionally <code>countdown</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">400</span> Bad request</div>
+                <p>No key was provided in the body.</p>
+                <div class="fields">Fields: <code>error</code> = <code>missing key</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">401</span> Unauthorized</div>
+                <p>The key is malformed or does not belong to an existing account.</p>
+                <div class="fields">Fields: <code>error</code> = <code>invalid key</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">429</span> Too many requests</div>
+                <p>Rate limit exceeded. <code>/solutions/login</code> allows 30 requests per minute.</p>
+                <div class="fields">Fields: none (rate-limit response)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="doc-card solve-doc">
+        <h2><i class="ph-bold ph-puzzle-piece"></i> Solve a CAPTCHA</h2>
+        <div class="endpoint-line">
+            <span class="method">POST</span>
+            <span class="path-code">/solutions/solve</span>
+        </div>
+        <p>
+            Sends a CAPTCHA image and its prompt, and returns the actions needed to solve it.
+            You are only charged when a solve succeeds.
+        </p>
+
+        <div class="note">
+            <i class="ph-bold ph-info"></i>
+            <span>Three AI modes exist and are all off by default - <code>AlwaysUseAI</code>,
+            <code>AIFallback</code>, and <code>ExperimentalAI</code>. They can be toggled on the
+            <a href="preferences" style="color:var(--accent-hi)">Preferences</a> page. Both AI paths are billed at
+            <strong>€0.002 per successful solve</strong>.</span>
+        </div>
+
+        <h3>How to make a request</h3>
+        <p>Send a JSON body with your API key, the prompt, and the image encoded as base64.</p>
+        <pre><span class="c">POST</span> <span id="out-url">http://localhost:5000</span>/solutions/solve
+<span class="c">Content-Type:</span> application/json
+
+{
+  <span class="k">"key"</span>:     <span class="s">"<span class="key-blur" id="out-key">YourApiKeyHere...</span>"</span>,
+  <span class="k">"prompt"</span>:  <span class="s">"Drag the matching shape into the empty cell"</span>,
+  <span class="k">"image"</span>:   <span class="s">"data:image/png;base64,iVBORw0KGgo..."</span>,
+  <span class="k">"capture"</span>: <span class="s">{ /* optional - required for ExperimentalAI (see below) */ }</span>
+}</pre>
+
+        <h3>Request fields</h3>
+        <table class="params-table">
+            <thead>
+                <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>key</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Your account API key (45 characters). Obtained from <code>/solutions/register</code> or <code>/solutions/login</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>prompt</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>The CAPTCHA instruction text, e.g. <em>"Click the 3 items used for gaming or sports"</em>.</td>
+                </tr>
+                <tr>
+                    <td><code>image</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>The CAPTCHA image as a base64 string. A full data-URI prefix is accepted. The request body is capped at 15&nbsp;MB.</td>
+                </tr>
+                <tr>
+                    <td><code>capture</code></td>
+                    <td>object</td>
+                    <td><span class="req">No</span></td>
+                    <td>Extra hCaptcha capture metadata. Required for the <strong>ExperimentalAI</strong> path - if missing, the request transparently falls back to the regular AI solver. See <a href="#experimental-ai" style="color:var(--accent-hi)">Experimental AI</a>.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Successful response</h3>
+        <pre><span class="c">// HTTP 200 - single-page result</span>
+{
+  <span class="k">"code"</span>:    <span class="n">200</span>,
+  <span class="k">"actions"</span>: [ <span class="s">/* solver-specific action objects */</span> ],
+  <span class="k">"time"</span>:    <span class="n">842</span>,        <span class="c">// ms spent solving</span>
+  <span class="k">"price"</span>:   <span class="n">0.002</span>,      <span class="c">// EUR charged (0.0 on free solvers)</span>
+  <span class="k">"balance"</span>: <span class="n">4.95</span>,       <span class="c">// your balance after the solve</span>
+  <span class="k">"ai"</span>:      <span class="n">false</span>       <span class="c">// true when any AI path handled it</span>
+}
+
+<span class="c">// HTTP 200 - multi-page result (ExperimentalAI only)</span>
+{
+  <span class="k">"code"</span>:         <span class="n">200</span>,
+  <span class="k">"actions"</span>:      {
+    <span class="k">"page1"</span>: [ <span class="s">/* actions for round 1 */</span> ],
+    <span class="k">"page2"</span>: [ <span class="s">/* actions for round 2 */</span> ]
+  },
+  <span class="k">"time"</span>:         <span class="n">1420</span>,
+  <span class="k">"price"</span>:        <span class="n">0.002</span>,
+  <span class="k">"balance"</span>:      <span class="n">4.948</span>,
+  <span class="k">"ai"</span>:           <span class="n">true</span>,
+  <span class="k">"experimental"</span>: <span class="n">true</span>   <span class="c">// present only on the ExperimentalAI path</span>
+}</pre>
+        <p><code>actions</code> is normally an <strong>array</strong> of action objects. Its exact shape depends on the solver that handled the prompt.</p>
+
+        <div class="note">
+            <i class="ph-bold ph-info"></i>
+            <span>When the <strong>ExperimentalAI</strong> solver handles the request and the challenge has multiple
+            rounds (which happens for grid, area-points, and multi-move drag challenges), <code>actions</code>
+            becomes an <strong>object</strong> keyed <code>"page1"</code>, <code>"page2"</code>, … - one array per round.
+            Single-round solves still return a plain array.</span>
+        </div>
+
+        <h3>Responses you can expect</h3>
+        <div class="resp-grid">
+            <div class="resp-item">
+                <div class="resp-code ok"><span class="num">200</span> Solved</div>
+                <p>Returned when a solver produced actions.</p>
+                <div class="fields">Fields: <code>actions</code>, <code>time</code>, <code>price</code>, <code>balance</code>, <code>ai</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">400</span> Bad request / Unsupported</div>
+                <p>Missing or malformed fields, a bad image, or no solver matched the prompt (and AI fallback is off).</p>
+                <div class="fields">Fields: <code>error</code> (<code>missing key prompt or image</code>, <code>bad input</code>, <code>bad image</code>, or <code>unsupported</code>), sometimes <code>time</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">401</span> Unauthorized</div>
+                <p>The key is missing, malformed, or does not belong to an existing account.</p>
+                <div class="fields">Fields: <code>error</code> = <code>invalid key</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">402</span> Not enough balance</div>
+                <p>The matched solver has a price and your balance is too low to cover it.</p>
+                <div class="fields">Fields: <code>error</code> = <code>balance</code>, <code>price</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">422</span> Could not solve</div>
+                <p>The solver ran but returned no usable actions.</p>
+                <div class="fields">Fields: <code>error</code> (<code>unsolved</code>, <code>ai_failed</code>, or <code>experimental_ai_failed</code>), <code>time</code>, sometimes <code>hint</code></div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">429</span> Too many requests</div>
+                <p>Rate limit exceeded. <code>/solutions/solve</code> allows 60 requests per minute.</p>
+                <div class="fields">Fields: none (rate-limit response)</div>
+            </div>
+            <div class="resp-item">
+                <div class="resp-code"><span class="num">500</span> Server error</div>
+                <p>An unexpected error occurred on the server.</p>
+                <div class="fields">Fields: none</div>
+            </div>
+        </div>
+
+        <div class="note">
+            <i class="ph-bold ph-warning"></i>
+            <span>You are only charged when a solve succeeds. Unsupported prompts, failed solves,
+            and balance errors never deduct from your balance.</span>
+        </div>
+    </div>
+
+    <div class="doc-card solve-doc" id="experimental-ai">
+        <h2><i class="ph-bold ph-flask"></i> Experimental AI</h2>
+        <p>
+            Experimental AI is an alternative solver optimised for hCaptcha-style puzzles.
+            It is often faster than the regular AI path, but may occasionally fail.
+            Both AI paths cost <strong>€0.002 per successful solve</strong>.
+        </p>
+
+        <div class="note">
+            <i class="ph-bold ph-info"></i>
+            <span>Enable it on the <a href="preferences" style="color:var(--accent-hi)">Preferences</a> page
+            by turning on <strong>Always Use AI</strong> (or <strong>AI Fallback</strong>) and selecting
+            <strong>Experimental AI</strong> as the AI type.</span>
+        </div>
+
+        <h3>The <code>capture</code> object</h3>
+        <p>
+            To use Experimental AI, add a <code>capture</code> object to your
+            <code>/solutions/solve</code> body with the raw challenge data the browser
+            captured. All fields below are forwarded to the upstream
+            <code>recognize-tl</code> service, so supply every value you can scrape -
+            missing ones reduce solve quality.
+        </p>
+        <table class="params-table">
+            <thead>
+                <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>getcaptcha_b64</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Base64 of the raw <code>/getcaptcha</code> response body. Forwarded as <code>getcaptcha_b64</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>hsw_b64</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Base64 of <code>hsw.js</code> (must be at least 200&nbsp;KB). Forwarded as <code>hsw_b64</code> when present.</td>
+                </tr>
+                <tr>
+                    <td><code>sitekey</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>The hCaptcha sitekey (UUID in the <code>/getcaptcha/&lt;sitekey&gt;</code> URL). Forwarded inside <code>client.sitekey</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>hcaptcha_version</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Version string parsed from the challenge iframe URL. Forwarded inside <code>client.hcaptcha_version</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>widget</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>One of <code>"checkbox"</code>, <code>"challenge"</code>, or <code>"enclave"</code>. Forwarded inside <code>client.widget</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>locale</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Browser locale, e.g. <code>"en-US"</code>. Forwarded inside <code>client.locale</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>timezone</code></td>
+                    <td>string</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>IANA timezone, e.g. <code>"Europe/Amsterdam"</code>. Forwarded inside <code>client.timezone</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>width</code></td>
+                    <td>int</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Challenge image width in pixels. Used locally to convert normalised coordinates into pixel clicks.</td>
+                </tr>
+                <tr>
+                    <td><code>height</code></td>
+                    <td>int</td>
+                    <td><span class="req">Yes</span></td>
+                    <td>Challenge image height in pixels. Used locally for coordinate conversion.</td>
+                </tr>
+                <tr>
+                    <td><code>tile_rects</code></td>
+                    <td>array</td>
+                    <td><span class="req">No</span></td>
+                    <td>Array of <code>[idx, x, y, w, h]</code> DOM rects for each grid tile. Required only for grid-style challenges with tiles; used locally to map tile indices to exact pixel centres. Without it, the solver falls back to guessing a uniform grid from <code>total</code>. Omit for non-tile challenges (drag, area, etc.).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <i class="ph-bold ph-info"></i>
+            <span><code>width</code>, <code>height</code>, and <code>tile_rects</code> are consumed
+            <strong>locally</strong> by the ExperimentalAI solver - they are not forwarded to the upstream
+            service. Everything else is sent verbatim in the outbound <code>recognize-tl</code> payload.</span>
+        </div>
+
+        <h3>Example request</h3>
+        <pre><span class="c">POST</span> <span id="out-url3">http://localhost:5000</span>/solutions/solve
+<span class="c">Content-Type:</span> application/json
+
+{
+  <span class="k">"key"</span>:    <span class="s">"<span class="key-blur" id="out-key3">YourApiKeyHere...</span>"</span>,
+  <span class="k">"prompt"</span>: <span class="s">"accounts.hcaptcha.com/demo"</span>,
+  <span class="k">"image"</span>:  <span class="s">"data:image/png;base64,iVBORw0KGgo..."</span>,
+  <span class="k">"capture"</span>: {
+    <span class="k">"getcaptcha_b64"</span>:   <span class="s">"eyJ0eXAiOiJKV1Qi..."</span>,
+    <span class="k">"hsw_b64"</span>:          <span class="s">"Ly8gQ29weXJpZ2h0I..."</span>,
+    <span class="k">"sitekey"</span>:          <span class="s">"a5f74b19-9e45-40e0-bd44-6c9e1c5d0a5c"</span>,
+    <span class="k">"hcaptcha_version"</span>: <span class="s">"a6c3f4b"</span>,
+    <span class="k">"widget"</span>:           <span class="s">"challenge"</span>,
+    <span class="k">"locale"</span>:           <span class="s">"en-US"</span>,
+    <span class="k">"timezone"</span>:         <span class="s">"Europe/Amsterdam"</span>,
+    <span class="k">"width"</span>:            <span class="n">400</span>,
+    <span class="k">"height"</span>:           <span class="n">400</span>,
+    <span class="k">"tile_rects"</span>:       [[<span class="n">0</span>, <span class="n">24</span>, <span class="n">24</span>, <span class="n">116</span>, <span class="n">116</span>], [<span class="n">1</span>, <span class="n">142</span>, <span class="n">24</span>, <span class="n">116</span>, <span class="n">116</span>]]  <span class="c">// include only if grid challenge</span>
+  }
+}</pre>
+
+        <h3>Multi-page results</h3>
+        <p>
+            Some challenges span more than one round. When that happens,
+            <code>actions</code> is an object keyed by page instead of a flat array:
+        </p>
+        <pre>{
+  <span class="k">"actions"</span>: {
+    <span class="k">"page1"</span>: [ [<span class="s">"click"</span>, [<span class="n">412</span>, <span class="n">338</span>]] ],
+    <span class="k">"page2"</span>: [ [<span class="s">"click"</span>, [<span class="n">120</span>, <span class="n">205</span>]] ]
+  }
+}</pre>
+        <p>
+            For single-round challenges <code>actions</code> stays a plain array, exactly
+            like the regular solvers.
+        </p>
+
+        <div class="note">
+            <i class="ph-bold ph-warning"></i>
+            <span>If <code>capture</code> is missing or the solver returns nothing usable,
+            the request transparently falls back to the regular AI solver (when
+            <strong>Always Use AI</strong> is on).</span>
+        </div>
+    </div>
+</div>
+
+<div class="logout-backdrop" id="logout-backdrop">
+    <div class="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+        <div class="logout-icon"><i class="ph-bold ph-sign-out"></i></div>
+        <h2 class="logout-title" id="logout-title">Log out?</h2>
+        <p class="logout-body">
+            You're about to log out of Gekke Solutions. Your API key will be
+            <strong>removed from this browser's local storage</strong>.
+            If you haven't saved it anywhere else, you'll lose access to
+            this account forever.
+        </p>
+        <div class="logout-warning">
+            <i class="ph-bold ph-warning"></i>
+            <span>Please download your API key before continuing. Without it, this account cannot be recovered.</span>
+        </div>
+        <div class="logout-key-preview" id="logout-key-preview">-</div>
+        <div class="logout-download">
+            <button class="btn" id="logout-download" type="button">
+                <i class="ph-bold ph-download-simple"></i> Download API key
+            </button>
+        </div>
+        <div class="logout-actions">
+            <button class="btn" id="logout-cancel" type="button">Cancel</button>
+            <button class="btn danger is-locked" id="logout-confirm" type="button" aria-disabled="true">
+                <span id="logout-confirm-label">Wait <span class="cooldown-num">5</span>s</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+window.APP = {
+    VpsUrl: "",
+    VpsResolver: "https://imgekkefries.pythonanywhere.com/vps",
+    storageKey: "GekkeSolutionsKey",
+};
+
+window.ready = (async () => {
+    try {
+        const res = await fetch(window.APP.VpsResolver, { cache: "no-store" });
+        const url = (await res.text()).trim();
+        if (url) window.APP.VpsUrl = url;
+    } catch (e) {
+        console.error("Failed to resolve VPS URL", e);
+    }
+})();
+window.$ = (sel, root = document) => root.querySelector(sel);
+window.getKey = () => localStorage.getItem(window.APP.storageKey);
+window.clearKey = () => localStorage.removeItem(window.APP.storageKey);
+window.api = (p) => window.APP.VpsUrl.replace(/\/$/, "") + p;
+window.postJSON = async (path, body) => {
+    if (window.ready) { try { await window.ready; } catch (e) {} }
+    const res = await fetch(api(path), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+    });
+    return res.json();
+};
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const container = document.getElementById("notificationContainer");
+    let activeNotifications = [];
+    let notificationId = 0;
+
+    function removeNotification(notification, skipAnimation = false) {
+        const id = notification.dataset.id;
+        const index = activeNotifications.findIndex(n => n.id == id);
+        if (index !== -1) {
+            const notif = activeNotifications[index];
+            if (notif.timeout) clearTimeout(notif.timeout);
+            activeNotifications.splice(index, 1);
+        }
+        if (skipAnimation) {
+            if (notification.parentNode) notification.remove();
+            return;
+        }
+        notification.classList.remove("show");
+        notification.classList.add("fade-out");
+        setTimeout(() => { if (notification.parentNode) notification.remove(); }, 250);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    window.showNotification = function (type, title, message, duration = 4000) {
+        const id = ++notificationId;
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.dataset.id = id;
+
+        let iconClass = "info-circle";
+        if (type === "success") iconClass = "check-circle";
+        else if (type === "error") iconClass = "times-circle";
+        else if (type === "warning") iconClass = "exclamation-triangle";
+
+        notification.innerHTML = `
+            <div class="notification-icon"><i class="fas fa-${iconClass}"></i></div>
+            <div class="notification-content">
+                <div class="notification-title">${escapeHtml(title)}</div>
+                <div class="notification-message">${escapeHtml(message)}</div>
+            </div>
+            <button class="notification-close"><i class="fas fa-times"></i></button>
+        `;
+        container.appendChild(notification);
+
+        notification.querySelector(".notification-close").addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeNotification(notification);
+        });
+
+        requestAnimationFrame(() => requestAnimationFrame(() => notification.classList.add("show")));
+
+        let timeout;
+        if (duration > 0) timeout = setTimeout(() => removeNotification(notification), duration);
+        activeNotifications.push({ id, element: notification, timeout });
+        if (activeNotifications.length > 15) activeNotifications = activeNotifications.slice(-15);
+        return id;
+    };
+
+    window.removeNotification = function (id) {
+        const n = document.querySelector(`.notification[data-id="${id}"]`);
+        if (n) removeNotification(n);
+    };
+
+    window.clearAllNotifications = function () {
+        activeNotifications.forEach(n => {
+            if (n.timeout) clearTimeout(n.timeout);
+            if (n.element.parentNode) {
+                n.element.classList.add("fade-out");
+                setTimeout(() => { if (n.element.parentNode) n.element.remove(); }, 250);
+            }
+        });
+        activeNotifications = [];
+    };
+
+    window.notify = {
+        success: (t, m, d) => window.showNotification("success", t, m, d),
+        error:   (t, m, d) => window.showNotification("error",   t, m, d),
+        warning: (t, m, d) => window.showNotification("warning", t, m, d),
+        info:    (t, m, d) => window.showNotification("info",    t, m, d),
+    };
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+    const topbar = document.getElementById("topbar");
+    const chip = document.getElementById("balance-chip");
+    const value = document.getElementById("balance-value");
+    function formatBalance(n) {
+        return Number(Number(n).toFixed(4)).toString();
+    }
+    async function refreshBalance() {
+        const key = getKey();
+        if (!key) { topbar.classList.remove("is-logged-in"); chip.classList.remove("is-visible"); return; }
+        try {
+            const d = await postJSON("/solutions/login", { key });
+            if (d.code === 200 && typeof d.balance === "number") {
+                topbar.classList.add("is-logged-in");
+                value.textContent = "€" + formatBalance(d.balance);
+                chip.classList.add("is-visible");
+            } else if (d.code === 401) {
+                clearKey();
+                topbar.classList.remove("is-logged-in");
+                chip.classList.remove("is-visible");
+            }
+        } catch (e) {}
+    }
+    document.getElementById("nav-logout").addEventListener("click", () => {
+        if (window.openLogoutModal) window.openLogoutModal();
+    });
+    refreshBalance();
+    setInterval(refreshBalance, 5000);
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const COOLDOWN_SECONDS = 5;
+
+    const backdrop     = document.getElementById("logout-backdrop");
+    const keyPreviewEl = document.getElementById("logout-key-preview");
+    const downloadBtn  = document.getElementById("logout-download");
+    const cancelBtn    = document.getElementById("logout-cancel");
+    const confirmBtn   = document.getElementById("logout-confirm");
+    const confirmLabel = document.getElementById("logout-confirm-label");
+
+    let cooldownTimer = null;
+    let cooldownLeft  = 0;
+    let currentKey    = "";
+
+    downloadBtn.addEventListener("click", onDownload);
+    cancelBtn.addEventListener("click", close);
+    confirmBtn.addEventListener("click", onConfirm);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && backdrop.classList.contains("is-open")) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    function open() {
+        currentKey = getKey() || "";
+        if (!currentKey) {
+            notify.info("Not logged in", "There's no active session.");
+            return;
+        }
+        keyPreviewEl.textContent = currentKey;
+        backdrop.classList.add("is-open");
+        startCooldown();
+    }
+
+    function close() {
+        backdrop.classList.remove("is-open");
+        endCooldown();
+    }
+
+    function onDownload() {
+        if (!currentKey) return;
+        const content = [
+            "Gekke Solutions - API Key",
+            "=========================",
+            "",
+            "Key:",
+            currentKey,
+            "",
+            "Saved: " + new Date().toISOString(),
+            "",
+            "Keep this file safe. This key is your login, your identity,",
+            "and your wallet on Gekke Solutions.",
+            "",
+        ].join("\n");
+
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url  = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "gekkesolutions-api-key.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        notify.success("Downloaded", "gekkesolutions-api-key.txt saved.");
+    }
+
+    function startCooldown() {
+        cooldownLeft = COOLDOWN_SECONDS;
+        confirmBtn.classList.add("is-locked");
+        confirmBtn.setAttribute("aria-disabled", "true");
+        renderCooldown();
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = setInterval(() => {
+            cooldownLeft -= 1;
+            if (cooldownLeft <= 0) endCooldown();
+            else renderCooldown();
+        }, 1000);
+    }
+
+    function renderCooldown() {
+        confirmLabel.innerHTML = `Wait <span class="cooldown-num">${cooldownLeft}</span>s`;
+    }
+
+    function endCooldown() {
+        if (cooldownTimer) clearInterval(cooldownTimer);
+        cooldownTimer = null;
+        if (backdrop.classList.contains("is-open")) {
+            confirmBtn.classList.remove("is-locked");
+            confirmBtn.removeAttribute("aria-disabled");
+            confirmLabel.innerHTML = `<i class="ph-bold ph-sign-out"></i> Log Out`;
+        }
+    }
+
+    function onConfirm() {
+        if (confirmBtn.classList.contains("is-locked")) return;
+        clearKey();
+        const topbar = document.getElementById("topbar");
+        const chip   = document.getElementById("balance-chip");
+        if (topbar) topbar.classList.remove("is-logged-in");
+        if (chip)   chip.classList.remove("is-visible");
+        close();
+        notify.success("Logged out", "Your API key was removed from this browser.");
+        window.location.href = window.__appRoot || "/";
+    }
+
+    window.openLogoutModal  = open;
+    window.closeLogoutModal = close;
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const baseInput = document.getElementById("cfg-baseurl");
+    const baseCopy  = document.getElementById("cfg-baseurl-copy");
+    const keyTextEl = document.getElementById("cfg-apikey-text");
+    const copyBtn   = document.getElementById("cfg-copy");
+    const outUrl    = document.getElementById("out-url");
+    const outKey    = document.getElementById("out-key");
+    const outUrl2   = document.getElementById("out-url2");
+    const outKey2   = document.getElementById("out-key2");
+    const outUrl3   = document.getElementById("out-url3");
+    const outKey3   = document.getElementById("out-key3");
+    let   keyValue  = "";
+
+    function cleanBase(v) {
+        return String(v || "").trim().replace(/\/+$/, "");
+    }
+
+    function syncUrl() {
+        const base = cleanBase(window.APP.VpsUrl) || "http://localhost:5000";
+        baseInput.value = base;
+        outUrl.textContent = base;
+        if (outUrl2) outUrl2.textContent = base;
+        if (outUrl3) outUrl3.textContent = base;
+    }
+
+    function syncKey() {
+        const shown = keyValue || "YourApiKeyHere...";
+        keyTextEl.textContent = shown;
+        outKey.textContent = shown;
+        if (outKey2) outKey2.textContent = shown;
+        if (outKey3) outKey3.textContent = shown;
+    }
+
+    keyValue = getKey() || "";
+    syncKey();
+    if (window.ready) {
+        window.ready.then(syncUrl, syncUrl);
+    } else {
+        syncUrl();
+    }
+
+    function retriggerAnim(btn, cls) {
+        btn.classList.remove(cls);
+        void btn.offsetWidth;
+        btn.classList.add(cls);
+    }
+
+    async function copyText(text, btn, emptyIcon) {
+        if (!text) {
+            retriggerAnim(btn, "is-copied");
+            btn.innerHTML = '<i class="ph-bold ph-x"></i>';
+            setTimeout(() => { btn.classList.remove("is-copied"); btn.innerHTML = '<i class="ph-bold ' + emptyIcon + '"></i>'; }, 1200);
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (e) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand("copy"); } catch (err) {}
+            ta.remove();
+        }
+        retriggerAnim(btn, "is-copied");
+        btn.innerHTML = '<i class="ph-bold ph-check"></i>';
+        setTimeout(() => { btn.classList.remove("is-copied"); btn.innerHTML = '<i class="ph-bold ' + emptyIcon + '"></i>'; }, 1400);
+    }
+
+    copyBtn.addEventListener("click", () => copyText(keyValue || "", copyBtn, "ph-copy"));
+    baseCopy.addEventListener("click", () => copyText(cleanBase(window.APP.VpsUrl) || "http://localhost:5000", baseCopy, "ph-copy"));
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    const indicator = document.getElementById("scrollIndicator");
+    if (!indicator) return;
+
+    let ticks = [];
+
+    function build() {
+        const vh = window.innerHeight || 1;
+        const pages = Math.max(1, Math.ceil(document.documentElement.scrollHeight / vh));
+        indicator.innerHTML = "";
+        ticks = [];
+        for (let i = 0; i < pages; i++) {
+            const t = document.createElement("div");
+            t.className = "si-tick";
+            indicator.appendChild(t);
+            ticks.push(t);
+        }
+        update();
+    }
+
+    function update() {
+        const vh = window.innerHeight || 1;
+        const max = document.documentElement.scrollHeight - vh;
+        const y = window.scrollY || window.pageYOffset || 0;
+        const ratio = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+        const pos = ratio * (ticks.length - 1);
+
+        const reach = 1.5;
+        ticks.forEach((t, i) => {
+            const d = Math.abs(i - pos);
+            const f = Math.max(0, 1 - d / reach);
+            const eased = f * f * (3 - 2 * f);
+            t.style.opacity = String(0.28 + eased * 0.72);
+            t.style.transform = "scaleX(" + (0.72 + eased * 0.28) + ")";
+        });
+        indicator.classList.toggle("is-visible", max > 0);
+    }
+
+    let raf = null;
+    window.addEventListener("scroll", () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => { raf = null; update(); });
+    }, { passive: true });
+
+    let rz = null;
+    window.addEventListener("resize", () => {
+        clearTimeout(rz);
+        rz = setTimeout(build, 150);
+    });
+
+    build();
+    window.addEventListener("load", build);
+})();
+</script>
+
+</body>
+</html>

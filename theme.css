@@ -1,0 +1,107 @@
+/* Gekke Solutions: shared theme. Loaded after each page's inline <style>, so it wins on equal specificity.
+   Palette: near-black ground, dark-grey surfaces, white ink. No hue anywhere.
+   Surfaces are separated by tone steps, not borders or shadows. Corners are square. */
+
+/* ---------- tokens ---------- */
+:root{
+--surface-0:#0b0b0b;--surface-1:#101010;--surface-2:#161616;--surface-3:#1e1e1e;--surface-4:#282828;
+--line-1:#1f1f1f;--line-2:#303030;
+--text-1:#f5f5f5;--text-2:#c2c2c2;--text-3:#8c8c8c;--text-4:#5a5a5a;
+--accent:#ffffff;--accent-hi:#ffffff;
+--good:#f5f5f5;--warn:#c2c2c2;--bad:#f5f5f5;
+--press:#d6d6d6;
+}
+html{color-scheme:dark}
+body{background:var(--surface-0)}
+body::before{display:none}            /* dotted grid: decoration */
+#pageLoader{background:var(--surface-0)}
+
+/* ---------- square corners, everywhere ---------- */
+.nav-btn,.balance-chip,.stat-box,.cta,.table-wrap,.settled-wrap,.status-pill,.invoice-status,
+.cd-modal,.cd-timer,.cd-btn,.logout-modal,.logout-warning,.logout-key-preview,.btn,
+.auth-card,.auth-input,.auth-submit,.modal,.modal-badge,.key-display,.copy-btn,.modal-warning,
+.topup-input,.topup-submit,.confirm-modal,.confirm-btn,.section-empty,.invoice-card,.invoice-pay,
+.download-btn,.notification,.notification-icon,.notification-close{border-radius:0}
+
+/* ---------- resting surfaces: tone only, no border, no shadow ---------- */
+.stat-box,.table-wrap,.settled-wrap,.invoice-card,.section-empty,.auth-card,
+.cd-modal,.logout-modal,.modal,.confirm-modal{border:0;box-shadow:none}
+.cd-timer,.logout-key-preview,.key-display{border:0;background:var(--surface-1)}
+.key-display:hover{background:var(--surface-3)}
+.topbar{border-bottom:0}
+.invoice-amounts{border:0;background:var(--surface-1);padding:clamp(12px,1.1vw,16px)}
+.table-wrap,.settled-wrap{overflow-x:auto}
+table.recent thead th,table.settled thead th{background:var(--surface-3)}
+.nav-btn.auth,.nav-btn.auth:hover{border-color:transparent}
+.nav-btn.is-active{border-color:transparent;background:var(--surface-3)}
+
+/* ---------- type: readable sizes, quieter labels ---------- */
+.brand{letter-spacing:-0.02em}
+.nav-btn{font-size:clamp(12px,0.4vw + 9px,14px);letter-spacing:0.08em}
+.stat-label,.section-count,.auth-label,.invoice-amount-item .label,.balance-chip .label,
+table.recent thead th,table.settled thead th{text-transform:none;letter-spacing:0.02em;font-size:clamp(12px,0.35vw + 9px,14px)}
+.section-title{font-size:clamp(18px,1vw + 11px,26px)}
+.stats{margin-bottom:clamp(32px,4vw,64px)}
+table.recent,table.settled{font-size:clamp(13px,0.35vw + 10px,15px)}
+.empty,.section-empty{text-transform:none;letter-spacing:0.02em;font-size:clamp(13px,0.4vw + 9px,15px);color:var(--text-2)}
+.topup-help,.topup-subtitle{font-size:clamp(12px,0.35vw + 9px,14px)}
+.cta,.btn,.cd-btn,.confirm-btn,.auth-submit,.topup-submit,.invoice-pay,.download-btn{font-size:clamp(12px,0.4vw + 9px,14px);letter-spacing:0.1em}
+.status-pill,.invoice-status{font-size:clamp(11px,0.3vw + 8px,12px);letter-spacing:0.08em;border:0}
+
+/* ---------- primary buttons: white fill, darker on hover/press ---------- */
+.nav-btn.auth.primary:hover,.cta:hover,.cd-btn.primary:hover,.auth-submit:hover:not(:disabled),
+.btn.primary:hover,.topup-submit:hover:not(:disabled),.confirm-btn.primary:hover:not(:disabled),.invoice-pay:hover{
+background:var(--press);border-color:var(--press);color:var(--surface-0)}
+.nav-btn:active,.cta:active,.btn:active,.cd-btn:active,.confirm-btn:active,.auth-submit:active,
+.topup-submit:active,.invoice-pay:active,.download-btn:active{transform:translateY(1px)}
+
+/* ---------- status: tone + weight instead of colour ---------- */
+.status-pill{gap:0.55em}
+.status-pill::before{content:"";width:0.55em;height:0.55em;border-radius:50%;background:currentColor;flex-shrink:0}
+.status-pill.settled{background:var(--text-1);color:var(--surface-0);border:0}
+.status-pill.processing{background:#3a3a3a;color:#fff;border:0}
+.status-pill.pending{background:#262626;color:#e0e0e0;border:0}
+.status-pill.invalid{background:var(--surface-3);color:var(--text-3);text-decoration:line-through;border:0}
+.status-pill.expired{background:var(--surface-3);color:var(--text-4);border:0}
+.invoice-status{background:#262626;color:#e0e0e0}
+.invoice-status.status-processing{background:#3a3a3a;color:#fff}
+.balance-chip .value.flash{color:var(--text-3)}
+
+/* ---------- logout / warnings: no red, no amber ---------- */
+.nav-btn.auth.logout,.nav-btn.auth.logout:hover{color:var(--text-1);border-color:transparent}
+.nav-btn.auth.logout{background:var(--surface-2)}
+.nav-btn.auth.logout:hover{background:var(--surface-3)}
+.logout-warning,.modal-warning{background:var(--surface-3);border:0;color:var(--text-1)}
+.btn.danger,.btn.danger:hover:not(:disabled){background:var(--text-1);border-color:var(--text-1);color:var(--surface-0)}
+.btn.danger:hover:not(:disabled){background:var(--press);border-color:var(--press)}
+.btn.danger.is-locked,.btn.danger.is-locked:hover{background:var(--surface-3);border-color:var(--line-2);color:var(--text-3)}
+.modal-badge{background:var(--surface-3);color:var(--text-1);border:0}
+.copy-btn.is-copied,.copy-btn.is-copied:hover:not(:disabled){background:var(--text-1);border-color:var(--text-1);color:var(--surface-0)}
+.copy-btn .icon-check{color:var(--surface-0)}
+
+/* ---------- overlays: flat dim, no blur ---------- */
+.cd-backdrop,.logout-backdrop,.modal-backdrop,.confirm-backdrop{background:rgba(0,0,0,0.82);backdrop-filter:none;-webkit-backdrop-filter:none}
+.notification{background:#1a1a1a;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 12px 32px rgba(0,0,0,0.6)}
+.notification.success .notification-icon{background:var(--text-1);color:var(--surface-0)}
+.notification.error .notification-icon{background:#3a3a3a;color:#fff}
+.notification.warning .notification-icon{background:#262626;color:#d0d0d0}
+.notification.info .notification-icon{background:#262626;color:var(--text-3)}
+
+/* ---------- login / register: card keeps one width ---------- */
+.auth-wrap{width:100%}
+
+/* ---------- focus ---------- */
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ---------- phone: topbar becomes two rows ---------- */
+@media (max-width:760px){
+.topbar{flex-wrap:wrap;row-gap:12px}
+.topbar-left{display:none}
+.topbar-right{order:1;flex:1 1 100%;justify-content:space-between}
+.topbar-center{order:2;flex:1 1 100%}
+.topbar-center .nav-btn{flex:1;justify-content:center;padding-left:8px;padding-right:8px}
+}
+
+@media (prefers-reduced-motion:reduce){
+*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
+}
